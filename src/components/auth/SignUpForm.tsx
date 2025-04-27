@@ -1,13 +1,37 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
+import axios from "../../api/axios";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [form, setForm] = useState({
+    fname: "",
+    lname: "",
+    email: "",
+    password: ""
+  });
+  const navigate = useNavigate();
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('/register', {
+        name: `${form.fname} ${form.lname}`,
+        email: form.email,
+        password: form.password,
+      });
+      localStorage.setItem('token', res.data.token);
+      navigate('/');
+    } catch (err: any) {
+      alert("Kayıt başarısız: " + JSON.stringify(err.response?.data));
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
       <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
@@ -82,55 +106,48 @@ export default function SignUpForm() {
                 </span>
               </div>
             </div>
-            <form>
-              <div className="space-y-5">
+
+               {/* 👇 FORM */}
+              <form onSubmit={handleRegister} className="space-y-5 mt-6">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {/* <!-- First Name --> */}
-                  <div className="sm:col-span-1">
-                    <Label>
-                      First Name<span className="text-error-500">*</span>
-                    </Label>
+                  <div>
+                    <Label>First Name<span className="text-error-500">*</span></Label>
                     <Input
                       type="text"
-                      id="fname"
-                      name="fname"
                       placeholder="Enter your first name"
+                      value={form.fname}
+                      onChange={(e) => setForm({ ...form, fname: e.target.value })}
                     />
                   </div>
-                  {/* <!-- Last Name --> */}
-                  <div className="sm:col-span-1">
-                    <Label>
-                      Last Name<span className="text-error-500">*</span>
-                    </Label>
+                  <div>
+                    <Label>Last Name<span className="text-error-500">*</span></Label>
                     <Input
                       type="text"
-                      id="lname"
-                      name="lname"
                       placeholder="Enter your last name"
+                      value={form.lname}
+                      onChange={(e) => setForm({ ...form, lname: e.target.value })}
                     />
                   </div>
                 </div>
-                {/* <!-- Email --> */}
+
                 <div>
-                  <Label>
-                    Email<span className="text-error-500">*</span>
-                  </Label>
+                  <Label>Email<span className="text-error-500">*</span></Label>
                   <Input
                     type="email"
-                    id="email"
-                    name="email"
                     placeholder="Enter your email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
                   />
                 </div>
-                {/* <!-- Password --> */}
+
                 <div>
-                  <Label>
-                    Password<span className="text-error-500">*</span>
-                  </Label>
+                  <Label>Password<span className="text-error-500">*</span></Label>
                   <div className="relative">
                     <Input
-                      placeholder="Enter your password"
                       type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -144,7 +161,7 @@ export default function SignUpForm() {
                     </span>
                   </div>
                 </div>
-                {/* <!-- Checkbox --> */}
+
                 <div className="flex items-center gap-3">
                   <Checkbox
                     className="w-5 h-5"
@@ -152,36 +169,32 @@ export default function SignUpForm() {
                     onChange={setIsChecked}
                   />
                   <p className="inline-block font-normal text-gray-500 dark:text-gray-400">
-                    By creating an account means you agree to the{" "}
-                    <span className="text-gray-800 dark:text-white/90">
-                      Terms and Conditions,
-                    </span>{" "}
-                    and our{" "}
-                    <span className="text-gray-800 dark:text-white">
-                      Privacy Policy
-                    </span>
+                    By creating an account you agree to our{" "}
+                    <span className="text-gray-800 dark:text-white/90">Terms</span> &{" "}
+                    <span className="text-gray-800 dark:text-white">Privacy Policy</span>.
                   </p>
                 </div>
-                {/* <!-- Button --> */}
+
                 <div>
-                  <button className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
+                  <button
+                    type="submit"
+                    className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                  >
                     Sign Up
                   </button>
                 </div>
-              </div>
-            </form>
 
-            <div className="mt-5">
-              <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Already have an account? {""}
-                <Link
-                  to="/signin"
-                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                >
-                  Sign In
-                </Link>
-              </p>
-            </div>
+                <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start mt-5">
+                  Already have an account?{" "}
+                  <Link
+                    to="/signin"
+                    className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                  >
+                    Sign In
+                  </Link>
+                </p>
+              </form>
+
           </div>
         </div>
       </div>

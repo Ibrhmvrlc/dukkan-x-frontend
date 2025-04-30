@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
+import { toast } from 'react-toastify';
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import axios from '../../api/axios';
+
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,8 +24,10 @@ export default function SignInForm() {
         email,
         password
       });
+
+      toast.success("Hoşgeldiniz!");
       localStorage.setItem('token', response.data.token);
-      
+     
       navigate('/'); // yönlendirme
     } catch (error: any) {
       alert("Giriş başarısız: " + (error.response?.data?.error || "Sunucu hatası"));

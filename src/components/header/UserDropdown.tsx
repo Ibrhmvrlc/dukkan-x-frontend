@@ -3,6 +3,7 @@ import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link } from "react-router";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function UserDropdown() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/signin");
+    toast.warning("Çıkış Yapıldı.");
   };
   
   return (

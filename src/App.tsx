@@ -8,6 +8,7 @@ import UserProfiles from "./pages/UserProfiles";
 import Videos from "./pages/UiElements/Videos";
 import Images from "./pages/UiElements/Images";
 import Alerts from "./pages/UiElements/Alerts";
+import RoleRoute from "./components/auth/RoleRoute"; // en üste
 import Badges from "./pages/UiElements/Badges";
 import Avatars from "./pages/UiElements/Avatars";
 import Buttons from "./pages/UiElements/Buttons";
@@ -22,10 +23,13 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Unauthorized from './pages/OtherPage/Unauthorized';
+import { AuthProvider } from './context/AuthContext'; // yol doğru mu kontrol et
 
 export default function App() {
   return (
     <>
+      <AuthProvider> {/* ← Bu eksik! */}
       <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -43,11 +47,19 @@ export default function App() {
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+            <Route path="/calendar" element={
+              <RoleRoute allowedRoles={['yetkili_bir']}><Calendar /></RoleRoute>
+              } />
+            <Route path="/blank" element={
+               <RoleRoute allowedRoles={['yetkili_bir']}>
+                <Blank />
+              </RoleRoute>
+            } />
 
             {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+            <Route path="/form-elements" element={
+               <RoleRoute allowedRoles={['yetkili_bir']}><FormElements /></RoleRoute>
+              } />
 
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
@@ -71,8 +83,10 @@ export default function App() {
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
         </Routes>
       </Router>
+      </AuthProvider>
     </>
   );
 }

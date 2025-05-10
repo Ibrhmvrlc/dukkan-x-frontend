@@ -7,7 +7,7 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-import axios from '../../api/axios';
+import { useAuth } from "../../context/AuthContext"; // en üste ekle
 
 
 export default function SignInForm() {
@@ -16,18 +16,14 @@ export default function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/login', {
-        email,
-        password
-      });
+      await login(email, password); // context içindeki login fonksiyonu
 
       toast.success("Hoşgeldiniz!");
-      localStorage.setItem('token', response.data.token);
-     
       navigate('/'); // yönlendirme
     } catch (error: any) {
       alert("Giriş başarısız: " + (error.response?.data?.error || "Sunucu hatası"));

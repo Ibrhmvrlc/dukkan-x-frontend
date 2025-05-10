@@ -24,12 +24,16 @@ import Home from "./pages/Dashboard/Home";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Unauthorized from './pages/OtherPage/Unauthorized';
-import { AuthProvider } from './context/AuthContext'; // yol doğru mu kontrol et
+import { useAuth } from './context/AuthContext';
+
 
 export default function App() {
+    const { loading } = useAuth();
+
+    if (loading) return <div>Yükleniyor...</div>;
+
   return (
     <>
-      <AuthProvider> {/* ← Bu eksik! */}
       <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -86,7 +90,6 @@ export default function App() {
           <Route path="/unauthorized" element={<Unauthorized />} />
         </Routes>
       </Router>
-      </AuthProvider>
     </>
   );
 }

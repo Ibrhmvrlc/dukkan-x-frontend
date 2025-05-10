@@ -3,8 +3,31 @@ import { Outlet } from "react-router";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
+import { useAuth } from '../context/AuthContext';
+import { useEffect } from 'react';
+
 
 const LayoutContent: React.FC = () => {
+   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      logout();
+      return;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+
+      if (payload.exp < now) {
+        logout();
+      }
+    } catch {
+      logout();
+    }
+  }, [user]); // user değiştiğinde tetiklensin
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (

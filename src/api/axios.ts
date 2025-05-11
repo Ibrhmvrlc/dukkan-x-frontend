@@ -27,6 +27,7 @@ instance.interceptors.response.use(
         const refreshResponse = await axios.post("http://localhost:8000/api/refresh", null, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Accept: "application/json", // 👈 BU ÇOK KRİTİK
           },
         });
 
@@ -38,7 +39,6 @@ instance.interceptors.response.use(
       } catch (refreshError) {
         // Eğer yenileme başarısızsa logout işlemi yapılabilir
         localStorage.removeItem("token");
-        window.localStorage.removeItem("token");
         window.location.href = "/signin"; // veya navigate('/signin')
         return Promise.reject(refreshError);
       }

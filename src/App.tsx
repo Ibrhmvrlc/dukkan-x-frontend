@@ -52,17 +52,17 @@ export default function App() {
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={
-              <RoleRoute allowedRoles={['yetkili_bir']}><Calendar /></RoleRoute>
+              <RoleRoute allowedRoles={['admin']}><Calendar /></RoleRoute>
               } />
             <Route path="/blank" element={
-               <RoleRoute allowedRoles={['yetkili_bir']}>
+               <RoleRoute allowedRoles={['admin']}>
                 <Blank />
               </RoleRoute>
             } />
 
             {/* Forms */}
             <Route path="/form-elements" element={
-               <RoleRoute allowedRoles={['yetkili_bir']}><FormElements /></RoleRoute>
+               <RoleRoute allowedRoles={['admin']}><FormElements /></RoleRoute>
               } />
 
             {/* Tables */}

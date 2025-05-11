@@ -25,7 +25,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Unauthorized from './pages/OtherPage/Unauthorized';
 import { useAuth } from './context/AuthContext';
-
+import MusteriCreate from './pages/Musteriler/MusteriCreate.tsx';
+import MusteriEdit from './pages/Musteriler/MusteriEdit.tsx';
+import MusteriList from './pages/Musteriler/MusteriList.tsx';
 
 export default function App() {
     const { loading } = useAuth();
@@ -48,6 +50,11 @@ export default function App() {
           {/* Dashboard Layout */}
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route index path="/" element={<Home />} />
+
+            {/* Musteri Modülü */}
+            <Route path="/musteriler/yeni" element={<MusteriCreate />} />
+            <Route path="/musteriler/:id/duzenle" element={<MusteriEdit />} />
+            <Route path="/musteriler" element={<MusteriList />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

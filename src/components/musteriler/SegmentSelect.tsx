@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../../api/axios';
 
 interface Segment {
   id: number;
@@ -18,22 +18,27 @@ export default function SegmentSelect({
   value,
   onChange,
   name = 'musteri_tur_id',
-  label = 'Segment',
+  label = 'Müşteri Sektörü',
   required = false,
 }: SegmentSelectProps) {
   const [segmentler, setSegmentler] = useState<Segment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('useEffect triggered');
     axios
       .get('/v1/musteri-turleri', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Accept: "application/json",
         }
       })
       .then((res) => {
-        if (Array.isArray(res.data.data)) {
-          setSegmentler(res.data.data);
+        const responseData = Array.isArray(res.data.data) ? res.data.data : res.data;
+        if (Array.isArray(responseData)) {
+          setSegmentler(responseData);
+        } else {
+          console.error("Veri beklenen formatta değil:", res.data);
         }
       })
       .catch((err) => {

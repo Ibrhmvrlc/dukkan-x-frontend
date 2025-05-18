@@ -1,12 +1,12 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import axios from 'axios';
+import axios from '../../api/axios';
 
 import UnvanInput from '../../components/musteriler/UnvanInput';
 import TelefonInput from '../../components/musteriler/TelefonInput';
 import EmailInput from '../../components/musteriler/EmailInput';
 import AdresTextarea from '../../components/musteriler/AdresTextarea';
-import TurSelect from '../../components/musteriler/TurSelect';
 import SegmentSelect from '../../components/musteriler/SegmentSelect';
+import TurSelect from '../../components/musteriler/TurSelect';
 import AktifSwitch from '../../components/musteriler/AktifSwitch';
 import VergiNoInput from '../../components/musteriler/VergiNoInput';
 import VergiDairesiInput from '../../components/musteriler/VergiDairesiInput';
@@ -15,10 +15,10 @@ import Button from "../../components/ui/button/Button";
 interface Musteri {
   id?: number;
   unvan: string;
+  tur: 'bireysel' | 'kurumsal';
   telefon?: string;
   email?: string;
   adres?: string;
-  tur: 'bireysel' | 'kurumsal';
   musteri_tur_id?: string | number | null;
   aktif: boolean;
   vergi_no?: string;
@@ -33,10 +33,10 @@ interface MusteriFormProps {
 export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
   const [form, setForm] = useState<Musteri>({
     unvan: '',
+    tur: 'bireysel',
     telefon: '',
     email: '',
     adres: '',
-    tur: 'bireysel',
     musteri_tur_id: '',
     aktif: true,
     vergi_no: '',
@@ -48,6 +48,13 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
       setForm({ ...musteri });
     }
   }, [musteri]);
+
+  const handleTelefonChange = (val: string) => {
+    setForm((prev) => ({
+      ...prev,
+      telefon: val,
+    }));
+  };
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -86,26 +93,27 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
         <UnvanInput value={form.unvan} onChange={handleChange} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <VergiNoInput value={form.vergi_no || ''} onChange={handleChange} />
         <VergiDairesiInput value={form.vergi_dairesi || ''} onChange={handleChange} />
+        <VergiNoInput value={form.vergi_no || ''} onChange={handleChange} />
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <SegmentSelect value={form.musteri_tur_id ?? ''} onChange={handleChange} />
+       <TurSelect value={form.tur} onChange={handleChange} />
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
         <AdresTextarea value={form.adres || ''} onChange={handleChange} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <TelefonInput value={form.telefon || ''} onChange={handleChange} />
+        <TelefonInput value={form.telefon || ''} onChange={handleTelefonChange} />
         <EmailInput value={form.email || ''} onChange={handleChange} />
+        <AktifSwitch checked={form.aktif} onChange={handleChange} />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <TurSelect value={form.tur} onChange={handleChange} />
-        <SegmentSelect value={form.musteri_tur_id ?? ''} onChange={handleChange} />
-      </div>
-      
      
-      <AktifSwitch checked={form.aktif} onChange={handleChange} />
-
       <div>
         <Button
+              type="submit"
               size="md"
               variant="primary"
             >

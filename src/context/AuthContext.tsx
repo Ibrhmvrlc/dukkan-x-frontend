@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization']; // 🚨 tokenı axios'tan da temizle
+    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     window.location.href = '/signin';
   };
@@ -42,14 +42,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; // 🚨 token'ı axios'a ekle
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-    axios.get('/me')
-      .then(res => setUser(res.data))
-      .catch(error => {
+    axios
+      .get('/me')
+      .then((res) => setUser(res.data))
+      .catch((error) => {
         setUser(null);
         if (error.response?.status === 401) {
-          logout(); // ✔️ hem token silinir hem yönlendirme yapılır
+          logout();
         }
       })
       .finally(() => setLoading(false));
@@ -57,10 +58,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     const response = await axios.post('/login', { email, password });
-    const token = response.data.token;
 
+    const token = response.data.access_token; // ✅ doğru key
     localStorage.setItem('token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; // ✔️ axios’a token’ı elle ekle
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
     const me = await axios.get('/me');
     setUser(me.data);

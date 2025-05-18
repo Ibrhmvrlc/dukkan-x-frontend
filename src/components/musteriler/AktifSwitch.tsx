@@ -28,7 +28,9 @@ export default function AktifSwitch({
           id={name}
           checked={checked}
           onChange={onChange}
-          className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer top-0 left-0 transition-transform duration-300 ease-in-out checked:translate-x-6"
+          className={`toggle-checkbox absolute block w-6 h-6 rounded-full border-4 appearance-none cursor-pointer top-0 left-0 transition-transform duration-300 ease-in-out
+            ${checked ? 'bg-green-500 translate-x-6' : 'bg-white'}
+          `}
         />
         <label
           htmlFor={name}

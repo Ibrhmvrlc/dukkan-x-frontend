@@ -14,7 +14,7 @@ interface Musteri {
   telefon?: string;
   email?: string;
   tur: string;
-  musteri_tur_id: tur | null;
+  musteri_tur: tur | null;
   aktif: boolean;
   not_sayisi: number;
 }
@@ -23,7 +23,6 @@ export default function MusterilerList() {
   const [musteriler, setMusteriler] = useState<Musteri[]>([]);
   const [loading, setLoading] = useState(true);
   
-
  useEffect(() => {
     axios.get('/v1/musteriler')
         .then(res => {
@@ -75,14 +74,13 @@ export default function MusterilerList() {
     return (
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-bold">Müşteriler</h1>
-          <Link to="/musteriler/yeni" className="btn btn-primary">+ Yeni Müşteri</Link>
+          <h1 className="text-xl font-bold dark:text-white/90">Müşteriler</h1>
+          <Link to="/musteriler/yeni" className="flex items-center justify-center p-3 font-medium text-white rounded-lg bg-brand-500 text-theme-sm hover:bg-brand-600">+ Yeni Müşteri</Link>
         </div>
-
         <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse border border-gray-300">
+          <table className="min-w-full table-auto border-collapse border border-gray-300 dark:text-white/90">
             <thead>
-              <tr className="bg-gray-100">
+              <tr className="bg-gray-100 dark:bg-white/[0.03]">
                 <th className="border px-4 py-2">Unvan</th>
                 <th className="border px-4 py-2">Telefon</th>
                 <th className="border px-4 py-2">Email</th>
@@ -103,7 +101,7 @@ export default function MusterilerList() {
                   </td>
                   <td className="border px-4 py-2">{musteri.email}</td>
                   <td className="border px-4 py-2 capitalize">{musteri.tur}</td>
-                  <td className="border px-4 py-2">{musteri.musteri_tur_id?.isim}</td>
+                  <td className="border px-4 py-2">{musteri.musteri_tur?.isim}</td>
                   <td className="border px-4 py-2">
                     <span className={`text-sm px-2 py-1 rounded ${musteri.aktif ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
                       {musteri.aktif ? 'Aktif' : 'Pasif'}

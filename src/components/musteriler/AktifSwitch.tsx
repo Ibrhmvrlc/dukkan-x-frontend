@@ -17,7 +17,7 @@ export default function AktifSwitch({
     <div className="mb-4 flex items-center gap-3">
       <label
         htmlFor={name}
-        className="text-sm font-medium text-gray-700"
+        className="text-sm font-medium text-gray-700 dark:text-white/90"
       >
         {label}
       </label>

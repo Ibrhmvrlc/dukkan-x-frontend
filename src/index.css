@@ -291,6 +291,13 @@ layer(base);
   }
 }
 
+/* Koyu tema destekli react-phone-number-input özelleştirmesi */
+html.dark .react-phone-number-input__country-select {
+  background-color: #1f2937; /* Tailwind dark:bg-gray-800 */
+  color: #ac2626; /* Tailwind dark:text-white */
+  border-color: #4b5563; /* Tailwind dark:border-gray-600 */
+}
+
 .tableCheckbox:checked ~ span span {
   @apply opacity-100;
 }

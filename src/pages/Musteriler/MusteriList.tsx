@@ -72,50 +72,55 @@ export default function MusterilerList() {
     }
 
     return (
-      <div className="p-4">
+      <div className="">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-bold dark:text-white/90">Müşteriler</h1>
           <Link to="/musteriler/yeni" className="flex items-center justify-center p-3 font-medium text-white rounded-lg bg-brand-500 text-theme-sm hover:bg-brand-600">+ Yeni Müşteri</Link>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse border border-gray-300 dark:text-white/90">
-            <thead>
-              <tr className="bg-gray-100 dark:bg-white/[0.03]">
-                <th className="border px-4 py-2">Unvan</th>
-                <th className="border px-4 py-2">Telefon</th>
-                <th className="border px-4 py-2">Email</th>
-                <th className="border px-4 py-2">Tür</th>
-                <th className="border px-4 py-2">Sektör</th>
-                <th className="border px-4 py-2">Durum</th>
-                <th className="border px-4 py-2">İşlemler</th>
+       <div className="overflow-x-auto p-2 border border-gray-200 rounded-2xl dark:border-white/10 shadow-sm">
+          <table className="min-w-full table-auto border-collapse text-sm text-gray-800 dark:text-white/90">
+            <thead className="bg-gray-100 dark:bg-white/[0.03]">
+              <tr>
+                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Unvan</th>
+                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Telefon</th>
+                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Email</th>
+                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Tür</th>
+                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Sektör</th>
+                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Durum</th>
+                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">İşlemler</th>
               </tr>
             </thead>
             <tbody>
               {musteriler.map((musteri) => (
-                <tr key={musteri.id}>
-                  <td className="border px-4 py-2">{musteri.unvan}</td>
-                  <td className="border px-4 py-2">
-                    <a href={`tel:+${musteri.telefon}`}>
-                    {musteri.telefon ? formatPhoneNumberIntl(musteri.telefon) : '-'}
+                <tr key={musteri.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">{musteri.unvan}</td>
+                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">
+                    <a href={`tel:+${musteri.telefon}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                      {musteri.telefon ? formatPhoneNumberIntl(musteri.telefon) : '-'}
                     </a>
                   </td>
-                  <td className="border px-4 py-2">{musteri.email}</td>
-                  <td className="border px-4 py-2 capitalize">{musteri.tur}</td>
-                  <td className="border px-4 py-2">{musteri.musteri_tur?.isim}</td>
-                  <td className="border px-4 py-2">
-                    <span className={`text-sm px-2 py-1 rounded ${musteri.aktif ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
+                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">{musteri.email}</td>
+                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10 capitalize">{musteri.tur}</td>
+                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">{musteri.musteri_tur?.isim}</td>
+                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${musteri.aktif ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
                       {musteri.aktif ? 'Aktif' : 'Pasif'}
                     </span>
                   </td>
-                  <td className="border px-4 py-2 space-x-2">
-                    <Link to={`/musteriler/${musteri.id}/profil`} className="btn btn-sm btn-outline">Profil</Link>
-                    <Link to={`/musteriler/${musteri.id}/duzenle`} className="btn btn-sm btn-outline">Düzenle</Link>
+                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10 space-x-2">
+                    <Link to={`/musteriler/${musteri.id}/profil`} className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                      Profil
+                    </Link>
+                    <Link to={`/musteriler/${musteri.id}/duzenle`} className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                      Düzenle
+                    </Link>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
       </div>
     );
 }

@@ -111,15 +111,16 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
         <AktifSwitch checked={form.aktif} onChange={handleChange} />
       </div>
      
-      <div>
+      <div className="flex justify-end">
         <Button
-              type="submit"
-              size="md"
-              variant="primary"
-            >
-              {musteri ? 'Güncelle' : 'Kaydet'}
-            </Button>
+          type="submit"
+          size="md"
+          variant="primary"
+        >
+          {musteri ? 'Güncelle' : 'Kaydet'}
+        </Button>
       </div>
+
     </form>
   );
 }

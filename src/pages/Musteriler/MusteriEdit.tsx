@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../api/axios';
 import MusteriForm from './MusteriForm';
+import MusteriYetkililerForm from './MusteriYetkililerForm';
 import { Modal } from "../../components/ui/modal";
 
 interface Tur {
@@ -85,7 +86,6 @@ export default function MusteriEdit() {
       setLoading(false);
     });
   }, [id]);
-
 
   const handleSuccess = () => {
     navigate('/musteriler');
@@ -387,10 +387,9 @@ export default function MusteriEdit() {
               Yetkili Bilgisi Düzenle
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Bilgileri eksiksiz ve uygun formatta giriniz, ardından kayıt etmek için güncelle butonuna basınız.
+              <MusteriYetkililerForm yetkili={musteri} onSuccess={handleSuccess} />
             </p>
           </div>
-          
         </div>
       </Modal>
 

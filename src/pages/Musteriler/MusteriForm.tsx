@@ -1,5 +1,6 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import axios from '../../api/axios';
+import MusteriYetkililerForm from './MusteriYetkililerForm';
 
 import UnvanInput from '../../components/musteriler/UnvanInput';
 import TelefonInput from '../../components/musteriler/TelefonInput';
@@ -65,6 +66,7 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
+  
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -89,28 +91,46 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-1">
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-        <UnvanInput value={form.unvan} onChange={handleChange} />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <VergiDairesiInput value={form.vergi_dairesi || ''} onChange={handleChange} />
-        <VergiNoInput value={form.vergi_no || ''} onChange={handleChange} />
+      <div className="p-5 mb-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+        <div className="gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
+              Genel ve Fatura Bilgileri
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <UnvanInput value={form.unvan} onChange={handleChange} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <VergiDairesiInput value={form.vergi_dairesi || ''} onChange={handleChange} />
+              <VergiNoInput value={form.vergi_no || ''} onChange={handleChange} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SegmentSelect value={form.musteri_tur_id ?? ''} onChange={handleChange} />
+            <TurSelect value={form.tur} onChange={handleChange} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <AdresTextarea value={form.adres || ''} onChange={handleChange} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <TelefonInput value={form.telefon || ''} onChange={handleTelefonChange} />
+              <EmailInput value={form.email || ''} onChange={handleChange} />
+              <AktifSwitch checked={form.aktif} onChange={handleChange} />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-       <SegmentSelect value={form.musteri_tur_id ?? ''} onChange={handleChange} />
-       <TurSelect value={form.tur} onChange={handleChange} />
+      <div className="p-5 mb-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+        <div className="gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
+              Yetkili Bilgileri
+            </h4>
+            <MusteriYetkililerForm yetkili={musteri} />
+          </div>
+        </div>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-        <AdresTextarea value={form.adres || ''} onChange={handleChange} />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <TelefonInput value={form.telefon || ''} onChange={handleTelefonChange} />
-        <EmailInput value={form.email || ''} onChange={handleChange} />
-        <AktifSwitch checked={form.aktif} onChange={handleChange} />
-      </div>
-     
+
       <div className="flex justify-end">
         <Button
           type="submit"
@@ -120,7 +140,6 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
           {musteri ? 'Güncelle' : 'Kaydet'}
         </Button>
       </div>
-
     </form>
   );
 }

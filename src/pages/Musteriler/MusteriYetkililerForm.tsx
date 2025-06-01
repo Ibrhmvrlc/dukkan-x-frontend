@@ -1,12 +1,13 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import axios from '../../api/axios';
+import Button from "../../components/ui/button/Button";
 
 import YetkiliAdSoyadInput from '../../components/musteriler/YetkiliAdSoyadInput';
 import YetkiliTelefonInput from '../../components/musteriler/YetkiliTelefonInput';
 import YetkiliEmailInput from '../../components/musteriler/YetkiliEmailInput';
 import YetkiliPozisyonInput from '../../components/musteriler/YetkiliPozisyonInput';
-import Button from "../../components/ui/button/Button";
 
+// Yetkili modelin
 interface Yetkili {
   id?: number;
   musteri_id?: number;
@@ -16,91 +17,107 @@ interface Yetkili {
   pozisyon?: string;
 }
 
-interface MusteriFormProps {
-  yetkili?: Yetkili;
-  onSuccess?: () => void;
-}
+// Controlled props (ana form için)
+type ControlledProps = {
+  controlled: true;
+  form: Yetkili;
+  musteriId: number;
+  onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onTelefonChange: (val: string) => void;
+};
 
-export default function MusteriForm({ yetkili, onSuccess }: MusteriFormProps) {
-  const [form, setForm] = useState<Yetkili>({
+// Uncontrolled props (modal için)
+type UncontrolledProps = {
+  controlled?: false;
+  form?: Yetkili;
+  musteriId: number;
+  onSuccess?: () => void;
+};
+
+// Final birleşik props
+type MusteriYetkililerFormProps = ControlledProps | UncontrolledProps;
+
+export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps) {
+  const [internalForm, setInternalForm] = useState<Yetkili>({
     isim: '',
     telefon: '',
     email: '',
     pozisyon: '',
+    musteri_id: props.musteriId
   });
 
   useEffect(() => {
-    if (yetkili) {
-      setForm({ ...yetkili });
+    if (!props.controlled && props.form) {
+      setInternalForm({ ...props.form, musteri_id: props.musteriId });
     }
-  }, [yetkili]);
+  }, [props]);
 
-  const handleTelefonChange = (val: string) => {
-    setForm((prev) => ({
-      ...prev,
-      telefon: val,
-    }));
-  };
+  const finalForm = props.controlled ? props.form : internalForm;
 
-  const handleChange = (
+  const handleInternalChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
+    setInternalForm(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleInternalTelefonChange = (val: string) => {
+    setInternalForm(prev => ({
+      ...prev,
+      telefon: val,
     }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      };
+      const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
 
-      if (yetkili) {
-        await axios.put(`/v1/musteriler/${yetkili.id}`, form, config);
+      if (props.form?.id) {
+        // Güncelleme (PUT)
+        await axios.put(`/v1/yetkililer/${props.form.id}`, internalForm, config);
       } else {
-        await axios.post('/v1/musteriler', form, config);
+        // Yeni kayıt (POST)
+        await axios.post(`/v1/yetkililer`, { ...internalForm, musteri_id: props.musteriId }, config);
       }
 
-      onSuccess?.();
+      props.onSuccess?.();
     } catch (err: any) {
       console.error('Kayıt hatası:', err.response?.data || err.message);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-1">
-      <div className="p-5 mb-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+    <form onSubmit={props.controlled ? undefined : handleSubmit}>
+      <div className="space-y-1">
         <div className="gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-              Genel ve Fatura Bilgileri
+              Yetkili Bilgileri
             </h4>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <YetkiliAdSoyadInput value={form.isim || ''} onChange={handleChange} />
-              <YetkiliTelefonInput value={form.telefon || ''} onChange={handleTelefonChange} />
+              <YetkiliAdSoyadInput value={finalForm.isim || ''} onChange={props.controlled ? props.onChange : handleInternalChange} />
+              <YetkiliTelefonInput value={finalForm.telefon || ''} onChange={props.controlled ? props.onTelefonChange : handleInternalTelefonChange} />
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <YetkiliEmailInput value={form.email ?? ''} onChange={handleChange} />
-            <YetkiliPozisyonInput value={form.pozisyon ?? ''} onChange={handleChange} />
+              <YetkiliEmailInput value={finalForm.email ?? ''} onChange={props.controlled ? props.onChange : handleInternalChange} />
+              <YetkiliPozisyonInput value={finalForm.pozisyon ?? ''} onChange={props.controlled ? props.onChange : handleInternalChange} />
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex justify-end">
-        <Button
-          type="submit"
-          size="md"
-          variant="primary"
-        >
-          {yetkili ? 'Güncelle' : 'Kaydet'}
-        </Button>
+        {!props.controlled && (
+          <div className="flex justify-end">
+            <Button type="submit" size="md" variant="primary">
+              {'Kaydet'}
+            </Button>
+          </div>
+        )}
       </div>
     </form>
   );

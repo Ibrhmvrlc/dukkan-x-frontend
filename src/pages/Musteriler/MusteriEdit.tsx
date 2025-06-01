@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../api/axios';
 import MusteriForm from './MusteriForm';
+import MusteriGenelFaturaForm from './MusteriGenelFaturaForm';
 import MusteriYetkililerForm from './MusteriYetkililerForm';
 import { Modal } from "../../components/ui/modal";
+import Button from "../../components/ui/button/Button";
 
 interface Tur {
   id: number;
@@ -11,7 +13,7 @@ interface Tur {
 }
 
 interface Yetkili {
-  id: number;
+  id?: number;
   musteri_id: number;
   isim: string;
   telefon?: string;
@@ -68,6 +70,13 @@ export default function MusteriEdit() {
     musteri_tur_id: null,
     musteri_tur: undefined, // optional alan
     aktif: true,
+  });
+
+  const [yetkili] = useState<Yetkili>({
+    isim: '',
+    telefon: '',
+    email: '',
+    pozisyon: '',
   });
 
   const { openModal, closeModal, isModalOpen } = useModal();
@@ -291,15 +300,7 @@ export default function MusteriEdit() {
       </div>
       <Modal isOpen={isModalOpen('editGenel')} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-          <div className="px-2 pr-14">
-            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Müşteri Bilgileri Düzenle
-            </h4>
-            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Bilgileri eksiksiz ve uygun formatta giriniz, ardından kayıt etmek için güncelle butonuna basınız.
-            </p>
-          </div>
-          <MusteriForm musteri={musteri} onSuccess={handleSuccess} />
+          <MusteriGenelFaturaForm musteri={musteri} onSuccess={handleSuccess} />
         </div>
       </Modal>
 
@@ -382,12 +383,13 @@ export default function MusteriEdit() {
       </div>
       <Modal isOpen={isModalOpen('editYetkili')} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-          <div className="px-2 pr-14">
-            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Yetkili Bilgisi Düzenle
-            </h4>
+          <div className="px-2">
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              <MusteriYetkililerForm yetkili={musteri} onSuccess={handleSuccess} />
+             <MusteriYetkililerForm 
+                musteriId={yetkili.musteri_id} 
+                form={yetkili} 
+                onSuccess={handleSuccess} 
+              />
             </p>
           </div>
         </div>
@@ -444,7 +446,15 @@ export default function MusteriEdit() {
               Bilgileri eksiksiz ve uygun formatta giriniz, ardından kayıt etmek için güncelle butonuna basınız.
             </p>
           </div>
-          
+          <div className="flex justify-end">
+          <Button
+            type="submit"
+            size="md"
+            variant="primary"
+          >
+                {'Kaydet'}
+              </Button>
+          </div>
         </div>
       </Modal>
     </div>

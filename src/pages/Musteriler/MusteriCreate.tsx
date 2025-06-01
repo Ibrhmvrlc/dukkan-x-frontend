@@ -16,7 +16,7 @@ export default function MusteriCreate() {
           <Link to="/musteriler" className="flex items-center justify-center p-3 font-medium text-white rounded-lg bg-brand-500 text-theme-sm hover:bg-brand-600">Müşteri Listesi</Link>
         </div>
         <div className="overflow-x-auto">
-            <MusteriForm onSuccess={handleSuccess} />
+          <MusteriForm onSuccess={handleSuccess} />
         </div>
     </div>
   );

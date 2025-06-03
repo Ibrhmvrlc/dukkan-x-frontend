@@ -46,13 +46,17 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
     musteri_id: props.musteriId
   });
 
+  // props.form değiştiğinde internalForm'u güncelle (uncontrolled modda)
   useEffect(() => {
     if (!props.controlled && props.form) {
       setInternalForm({ ...props.form, musteri_id: props.musteriId });
     }
-  }, [props]);
+  }, [props.form, props.musteriId, props.controlled]);
 
-  const finalForm = props.controlled ? props.form : internalForm;
+  // Form verisini unified şekilde alıyoruz
+  const finalForm: Yetkili = props.controlled 
+    ? (props.form ?? { isim: '', telefon: '', email: '', pozisyon: '', musteri_id: props.musteriId })
+    : internalForm;
 
   const handleInternalChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -76,9 +80,9 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
     try {
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
 
-      if (props.form?.id) {
+      if (internalForm.id) {
         // Güncelleme (PUT)
-        await axios.put(`/v1/yetkililer/${props.form.id}`, internalForm, config);
+        await axios.put(`/v1/yetkililer/${internalForm.id}`, internalForm, config);
       } else {
         // Yeni kayıt (POST)
         await axios.post(`/v1/yetkililer`, { ...internalForm, musteri_id: props.musteriId }, config);
@@ -100,13 +104,25 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <YetkiliAdSoyadInput value={finalForm.isim || ''} onChange={props.controlled ? props.onChange : handleInternalChange} />
-              <YetkiliTelefonInput value={finalForm.telefon || ''} onChange={props.controlled ? props.onTelefonChange : handleInternalTelefonChange} />
+              <YetkiliAdSoyadInput 
+                value={finalForm.isim} 
+                onChange={props.controlled ? props.onChange : handleInternalChange} 
+              />
+              <YetkiliTelefonInput 
+                value={finalForm.telefon ?? ''} 
+                onChange={props.controlled ? props.onTelefonChange : handleInternalTelefonChange} 
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <YetkiliEmailInput value={finalForm.email ?? ''} onChange={props.controlled ? props.onChange : handleInternalChange} />
-              <YetkiliPozisyonInput value={finalForm.pozisyon ?? ''} onChange={props.controlled ? props.onChange : handleInternalChange} />
+              <YetkiliEmailInput 
+                value={finalForm.email ?? ''} 
+                onChange={props.controlled ? props.onChange : handleInternalChange} 
+              />
+              <YetkiliPozisyonInput 
+                value={finalForm.pozisyon ?? ''} 
+                onChange={props.controlled ? props.onChange : handleInternalChange} 
+              />
             </div>
           </div>
         </div>

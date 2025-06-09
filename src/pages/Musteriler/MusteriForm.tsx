@@ -2,7 +2,19 @@ import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import axios from '../../api/axios';
 import MusteriYetkililerForm from './MusteriYetkililerForm';
 import MusteriGenelFaturaForm from './MusteriGenelFaturaForm';
+import MusteriTeslimatAdresleriForm from './MusteriTeslimatAdresleriForm';
+
 import Button from "../../components/ui/button/Button";
+
+interface TeslimatAdresi {
+  id?: number;
+  musteri_id?: number;
+  baslik: string;
+  adres: string;
+  ilce?: string;
+  il?: string;
+  posta_kodu?: string;
+}
 
 interface Musteri {
   id?: number;
@@ -51,6 +63,24 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
     pozisyon: '',
   });
 
+  const [teslimatAdresi, setTeslimatAdresi] = useState<TeslimatAdresi>({
+    baslik: '',
+    adres: '',
+    ilce: '',
+    il: '',
+    posta_kodu: ''
+  });
+
+  const handleTeslimatAdresiChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setTeslimatAdresi(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleYetkiliChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -90,32 +120,45 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
-  
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Basit validasyon kontrolü
+    if (!form.unvan || !yetkili.isim || !teslimatAdresi.baslik) {
+        alert("Lütfen tüm zorunlu alanları doldurun.");
+        return;
+    }
+
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      };
+      const config = { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } };
+
+      let musteriResponse;
 
       if (musteri) {
-        await axios.put(`/v1/musteriler/${musteri.id}`, form, config);
+        musteriResponse = await axios.put(`/v1/musteriler/${musteri.id}`, form, config);
       } else {
-        await axios.post('/v1/musteriler', form, config);
+        musteriResponse = await axios.post(`/v1/musteriler`, form, config);
       }
 
+      const musteriId = musteriResponse.data.id ?? musteriResponse.data.data?.id;
+
+      const { musteri_id: yetkiliMusteriId, ...yetkiliWithoutMusteriId } = yetkili;
+      await axios.post(`/v1/yetkililer`, { ...yetkiliWithoutMusteriId, musteri_id: musteriId }, config);
+
+      const { musteri_id: teslimatMusteriId, ...teslimatAdresiWithoutMusteriId } = teslimatAdresi;
+      await axios.post(`/v1/musteriler/${musteriId}/teslimat-adresleri`, { ...teslimatAdresiWithoutMusteriId, musteri_id: musteriId }, config);
+
       onSuccess?.();
+
     } catch (err: any) {
-      console.error('Kayıt hatası:', err.response?.data || err.message);
+      console.error("Kayıt hatası:", err.response?.data || err.message);
     }
-  };
+};
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-1">
-
       <div className="p-5 mb-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <div className="gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -135,9 +178,22 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
             <MusteriYetkililerForm
               controlled
               form={yetkili}
-              musteriId={yetkili.musteri_id!}
+              musteriId={musteri?.id ?? 0}
               onChange={handleYetkiliChange} 
               onTelefonChange={handleYetkiliTelefonChange}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5 mb-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+        <div className="gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <MusteriTeslimatAdresleriForm
+              controlled
+              form={teslimatAdresi}
+              musteriId={musteri?.id ?? 0}
+              onChange={handleTeslimatAdresiChange}
             />
           </div>
         </div>
@@ -152,7 +208,6 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
           {'Kaydet'}
         </Button>
       </div>
-
     </form>
   );
 }

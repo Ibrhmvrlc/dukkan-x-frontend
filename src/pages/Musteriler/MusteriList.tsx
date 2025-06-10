@@ -93,7 +93,7 @@ export default function MusterilerList() {
             <tbody>
               {musteriler.map((musteri) => (
                 <tr key={musteri.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">{musteri.unvan}</td>
+                  <td className="px-4 py-3 border-b border-gray-200/20">{musteri.unvan}</td>
                   <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">
                     <a href={`tel:+${musteri.telefon}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                       {musteri.telefon ? formatPhoneNumberIntl(musteri.telefon) : '-'}

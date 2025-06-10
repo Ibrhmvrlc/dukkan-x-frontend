@@ -28,6 +28,7 @@ import { useAuth } from './context/AuthContext';
 import MusteriCreate from './pages/Musteriler/MusteriCreate.tsx';
 import MusteriEdit from './pages/Musteriler/MusteriEdit.tsx';
 import MusteriList from './pages/Musteriler/MusteriList.tsx';
+import UrunList from "./pages/Urunler/UrunList.tsx";
 
 export default function App() {
     const { loading } = useAuth();
@@ -83,6 +84,8 @@ export default function App() {
             <Route path="/musteriler/yeni" element={<MusteriCreate />} />
             <Route path="/musteriler/:id/duzenle" element={<MusteriEdit />} />
             <Route path="/musteriler" element={<MusteriList />} />
+            <Route path="/urunler" element={<UrunList />} />
+            
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

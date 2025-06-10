@@ -7,6 +7,7 @@ import {
   CalenderIcon,
   ChevronDownIcon,
   GridIcon,
+  GroupIcon,
   HorizontaLDots,
   ListIcon,
   PageIcon,
@@ -32,9 +33,23 @@ const navItems: NavItem[] = [
     path: "/",
   },
   {
-    icon: <ListIcon />,
-    name: "Müşteriler",
-    path: "/musteriler",
+    icon: <GroupIcon />,
+    name: "Firmalar",
+    subItems: [
+      { name: "Müşteriler", path: "/musteriler", pro: false },
+      { name: "Tedarikçiler", path: "/tedarikciler", pro: false },
+      { name: "Nakliyeciler", path: "/nakliyeciler", pro: false },
+      { name: "Bankalar", path: "/bankalar", pro: true },
+    ],
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Ürünler",
+    subItems: [
+      { name: "Ürün Yönetimi", path: "/urunler", pro: false },
+      { name: "Fiyat Listesi", path: "/fiyat-listesi", pro: false },
+      { name: "Fiyat Güncelle", path: "/fiyat-guncelle", pro: false },
+    ],
   },
   {
     icon: <CalenderIcon />,

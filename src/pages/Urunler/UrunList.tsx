@@ -98,9 +98,9 @@ export default function UrunList() {
               <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Adı</th>
               <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Çeşidi</th>
               <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Birim</th>
-              <th className="px-4 py-3 text-right font-medium border-b border-gray-300/20 dark:border-white/10 text-red-700 dark:text-red-300">Tedarik Fiyatı</th>
+              <th className="px-4 py-3 text-right font-medium border-b border-gray-300/20 dark:border-white/10 text-red-700 dark:text-red-300 hidden md:table-cell">Tedarik Fiyatı</th>
               <th className="px-4 py-3 text-right font-medium border-b border-gray-300/20 dark:border-white/10 text-green-700 dark:text-green-300">Satış Fiyatı</th>
-              <th className="px-4 py-3 text-right font-medium border-b border-gray-300/20 dark:border-white/10">Stok</th>
+              <th className="px-4 py-3 text-right font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Stok</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">İşlem</th>
             </tr>
           </thead>
@@ -110,26 +110,23 @@ export default function UrunList() {
                 <td className="p-2">{urun.isim}</td>
                 <td className="p-2">{urun.cesit}</td>
                 <td className="p-2">{urun.birim}</td>
-                <td className="p-2 text-right text-red-700 dark:text-red-300">{urun.tedarik_fiyati} ₺</td>
+                <td className="p-2 text-right text-red-700 dark:text-red-300 hidden md:table-cell">{urun.tedarik_fiyati} ₺</td>
                 <td className="p-2 text-right text-green-700 dark:text-green-300">{urun.satis_fiyati} ₺</td>
-                <td
-                  className={`p-2 text-right ${
-                    urun.kritik_stok != null && Number(urun.stok_miktari) <= Number(urun.kritik_stok)
-                      ? 'text-red-500'
-                      : ''
-                  }`}
-                >
+                <td className={`p-2 text-right hidden md:table-cell ${
+                  urun.kritik_stok != null && Number(urun.stok_miktari) <= Number(urun.kritik_stok)
+                    ? 'text-red-500'
+                    : ''
+                }`}>
                   {urun.stok_miktari}
                 </td>
-               
                 <td className="p-2 text-center">
                   <Link 
                     to={`/urunler/${urun.id}`} 
                     className="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 text-blue-600 dark:text-blue-400"
                   >
-                  <svg className="fill-current w-5 h-5" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
-                  </svg>
+                    <svg className="fill-current w-5 h-5" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
+                    </svg>
                   </Link>
                 </td>
               </tr>
@@ -137,7 +134,7 @@ export default function UrunList() {
 
             {filteredUrunler.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-4 text-center text-gray-500">Kayıt bulunamadı</td>
+                <td colSpan={7} className="p-4 text-center text-gray-500">Kayıt bulunamadı</td>
               </tr>
             )}
           </tbody>

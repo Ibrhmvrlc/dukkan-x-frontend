@@ -122,7 +122,6 @@ export default function MusterilerList() {
             </tbody>
           </table>
         </div>
-
       </div>
     );
 }

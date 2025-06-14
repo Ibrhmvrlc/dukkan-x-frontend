@@ -1,7 +1,8 @@
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 
-export default function BarChartOne() {
+
+export default function BarChartOne({ data }: { data: number[] }) {
   const options: ApexOptions = {
     colors: ["#465fff"],
     chart: {
@@ -30,18 +31,18 @@ export default function BarChartOne() {
     },
     xaxis: {
       categories: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
+        "Oca",  // Ocak
+        "Şub",  // Şubat
+        "Mar",  // Mart
+        "Nis",  // Nisan
+        "May",  // Mayıs
+        "Haz",  // Haziran
+        "Tem",  // Temmuz
+        "Ağu",  // Ağustos
+        "Eyl",  // Eylül
+        "Eki",  // Ekim
+        "Kas",  // Kasım
+        "Ara"   // Aralık
       ],
       axisBorder: {
         show: false,
@@ -83,8 +84,8 @@ export default function BarChartOne() {
   };
   const series = [
     {
-      name: "Sales",
-      data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
+      name: "Satış",
+      data: data,
     },
   ];
   return (

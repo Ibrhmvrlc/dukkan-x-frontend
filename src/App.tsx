@@ -30,6 +30,7 @@ import MusteriEdit from './pages/Musteriler/MusteriEdit.tsx';
 import MusteriList from './pages/Musteriler/MusteriList.tsx';
 import UrunList from "./pages/Urunler/UrunList.tsx";
 import UrunEdit from "./pages/Urunler/UrunEdit.tsx";
+import YeniUrun from "./pages/Urunler/YeniUrun.tsx";
 
 export default function App() {
     const { loading } = useAuth();
@@ -89,6 +90,7 @@ export default function App() {
             {/* Urun Modülü */}
             <Route path="/urunler" element={<UrunList />} />
             <Route path="/urunler/:id" element={<UrunEdit />} />
+            <Route path="/urunler/yeni" element={<YeniUrun />} />
             
 
             {/* Others Page */}

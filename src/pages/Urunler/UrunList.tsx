@@ -237,12 +237,12 @@ export default function UrunList() {
               <td></td>
               <td></td>
               <td></td>
-              <td></td>
+              <td className="hidden md:table-cell"></td>
               <td className="p-4 text-right font-semibold">Ortalama Kar:</td>
               <td className="p-4 text-center font-semibold text-green-700 dark:text-green-300">
                 %{ortalamaKarOrani.toFixed(2).replace('.', ',')}
               </td>
-              <td></td>
+              <td className="hidden md:table-cell"></td>
             </tr>
           </tfoot>
         </table>

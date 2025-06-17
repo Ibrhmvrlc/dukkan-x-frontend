@@ -3,6 +3,7 @@ import axios from '../../api/axios';
 import { Link } from 'react-router-dom';
 import { Modal } from "../../components/ui/modal";
 import { parseClassNames } from '@fullcalendar/core/internal';
+import { toast } from 'react-toastify';
 
 interface Urun {
   id: number;
@@ -94,26 +95,65 @@ export default function UrunList() {
   };
 
   const handleBulkUpload = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!bulkFile) return alert("Lütfen bir dosya seçin");
+    e.preventDefault();
 
-      const formData = new FormData();
-      formData.append("file", bulkFile);
+    if (!bulkFile) {
+      toast.warn("Lütfen bir dosya seçin", {
+        position: "top-right",
+      });
+      return;
+    }
 
-      try {
-        await axios.post('/v1/urunler/bulk-upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+    const formData = new FormData();
+    formData.append("file", bulkFile);
 
-        await fetchUrunler(); // tabloyu güncelle
-        setShowBulkModal(false);
-        setBulkFile(null);
-        alert("Ürünler başarıyla yüklendi.");
-      } catch (err: any) {
-        console.error("Yükleme hatası:", err.response?.data || err.message);
-        alert("Yükleme başarısız oldu.");
-      }
-    };
+    try {
+      await axios.post('/v1/urunler/bulk-upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      await fetchUrunler(); // tabloyu güncelle
+      setShowBulkModal(false);
+      setBulkFile(null);
+
+      toast.success("Ürünler başarıyla yüklendi.", {
+        position: "top-right",
+      });
+    } catch (err: any) {
+      console.error("Yükleme hatası:", err.response?.data || err.message);
+      toast.error("Yükleme başarısız oldu.", {
+        position: "top-right",
+      });
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const token = localStorage.getItem('token'); // eksikse bu satır olsun
+
+      const response = await axios.post('/v1/urunler/export', {}, {
+        responseType: 'blob',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'urunler.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast.success("Excel başarıyla indirildi", { position: "top-right" });
+    } catch (error) {
+      console.error("Excel dışa aktarma hatası:", error);
+      toast.error("Excel dışa aktarma başarısız oldu", { position: "top-right" });
+    }
+  };
+
+
 
 
   const filteredUrunler = urunler.filter((item) => {
@@ -166,7 +206,8 @@ export default function UrunList() {
               📁 Toplu Yükle
             </button>
             <button
-              className="bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+              onClick={handleExport}
+              className="bg-orange-400 hover:bg-orange-500 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
             >
               Dışa Aktar
             </button>
@@ -336,8 +377,8 @@ export default function UrunList() {
 
           <form onSubmit={handleBulkUpload} className="flex flex-col gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-1">
-                Excel veya CSV Dosyası Seçin
+              <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-2">
+                Excel veya CSV Dosyası seçilmelidir. Ayrıca Dosya içeriği sırasıyla "kod, isim, cesit, birim, tedarik_fiyati, satis_fiyati, stok_miktari, kritik_stok, aktif" sütunlarından oluşmalıdır.
               </label>
               <input
                 type="file"

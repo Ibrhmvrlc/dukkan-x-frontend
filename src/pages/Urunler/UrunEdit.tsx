@@ -214,7 +214,7 @@ export default function UrunEdit() {
                 type="number"
                 step="0.01"
                 name="tedarik_fiyati"
-                value={form?.tedarik_fiyati ?? ''}
+                value={form?.tedarik_fiyati ?? 0}
                 onChange={handleChange}
                 className="border border-gray-300 rounded px-2 py-1 text-sm w-full dark:bg-white/10 dark:text-white/90"
               />
@@ -231,7 +231,7 @@ export default function UrunEdit() {
                 type="number"
                 step="0.01"
                 name="satis_fiyati"
-                value={form?.satis_fiyati ?? ''}
+                value={form?.satis_fiyati ?? 0}
                 onChange={handleChange}
                 className="border border-gray-300 rounded px-2 py-1 text-sm w-full dark:bg-white/10 dark:text-white/90"
               />
@@ -240,11 +240,19 @@ export default function UrunEdit() {
             )}
           </td>
         </tr>
+         <tr>
+          <td className="py-1.5 font-medium min-w-fit whitespace-nowrap">Kar Marjı:</td>
+          <td className="py-1.5 w-full">
+            %{((urun.satis_fiyati - urun.tedarik_fiyati) / urun.satis_fiyati * 100)
+            .toFixed(2)
+            .replace('.', ',')}
+          </td>
+        </tr>
         <tr>
           <td className="py-1.5 font-medium min-w-fit whitespace-nowrap">Stok Miktarı:</td>
           <td
             className={`py-1.5 w-full ${
-              urun.kritik_stok != null && (form?.stok_miktari ?? urun.stok_miktari) <= urun.kritik_stok
+              urun.kritik_stok != null && (Number(form?.stok_miktari ?? urun.stok_miktari)) <= Number(urun.kritik_stok)
                 ? 'text-red-600 dark:text-red-400 font-semibold'
                 : ''
             }`}
@@ -253,12 +261,12 @@ export default function UrunEdit() {
               <input
                 type="number"
                 name="stok_miktari"
-                value={form?.stok_miktari ?? ''}
+                value={Number(form?.stok_miktari) ?? 0}
                 onChange={handleChange}
                 className="border border-gray-300 rounded px-2 py-1 text-sm w-full dark:bg-white/10 dark:text-white/90"
               />
             ) : (
-              urun.stok_miktari
+              Number(urun.stok_miktari)
             )}
           </td>
         </tr>
@@ -269,12 +277,12 @@ export default function UrunEdit() {
               <input
                 type="number"
                 name="kritik_stok"
-                value={form?.kritik_stok ?? ''}
+                value={Number(form?.kritik_stok) ?? 0}
                 onChange={handleChange}
                 className="border border-gray-300 rounded px-2 py-1 text-sm w-full dark:bg-white/10 dark:text-white/90"
               />
             ) : (
-              urun.kritik_stok
+             Number(urun.kritik_stok)
             )}
           </td>
         </tr>
@@ -286,12 +294,12 @@ export default function UrunEdit() {
                 type="number"
                 step="0.01"
                 name="kdv_orani"
-                value={form?.kdv_orani ?? ''}
+                value={Number(form?.kdv_orani) ?? 0}
                 onChange={handleChange}
                 className="border border-gray-300 rounded px-2 py-1 text-sm w-full dark:bg-white/10 dark:text-white/90"
               />
             ) : (
-              `%${urun.kdv_orani}`
+              `%${Number(urun.kdv_orani)}` 
             )}
           </td>
         </tr>

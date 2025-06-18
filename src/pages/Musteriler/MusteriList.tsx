@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from '../../api/axios';
 import { Link } from 'react-router-dom';
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
+import Button from "../../components/ui/button/Button";
 
 interface tur {
   id: number;
@@ -81,40 +82,48 @@ export default function MusterilerList() {
           <table className="min-w-full table-auto border-collapse text-sm text-gray-800 dark:text-white/90">
             <thead className="bg-gray-100 dark:bg-white/[0.03]">
               <tr>
-                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Unvan</th>
-                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Telefon</th>
-                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Email</th>
-                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Tür</th>
-                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Sektör</th>
-                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Durum</th>
-                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">İşlemler</th>
+                <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10">Unvan</th>
+                <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10 hidden md:table-cell">Telefon</th>
+                <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10 hidden 2xl:table-cell">Email</th>
+                <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10 hidden 2xl:table-cell">Tür</th>
+                <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10 hidden md:table-cell">Sektör</th>
+                <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10 hidden md:table-cell">Durum</th>
+                <th className="px-4 py-3 text-center font-medium border-b dark:border-white/10">İşlemler</th>
               </tr>
             </thead>
             <tbody>
               {musteriler.map((musteri) => (
-                <tr key={musteri.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3 border-b border-gray-200/20">{musteri.unvan}</td>
-                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">
+                <tr key={musteri.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border dark:border-white/10">
+                  <td className="px-4 py-3 border-b dark:border-white/10">
+                   <Link 
+                      to={`/musteriler/${musteri.id}/duzenle`} 
+                      className="hover:bg-blue-100 text-blue-600 dark:text-blue-400"
+                    >
+                      {musteri.unvan}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 border-b dark:border-white/10 hidden md:table-cell">
                     <a href={`tel:+${musteri.telefon}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                       {musteri.telefon ? formatPhoneNumberIntl(musteri.telefon) : '-'}
                     </a>
                   </td>
-                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">{musteri.email}</td>
-                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10 capitalize">{musteri.tur}</td>
-                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">{musteri.musteri_tur?.isim}</td>
-                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10">
+                  <td className="px-4 py-3 border-b dark:border-white/10 hidden 2xl:table-cell">{musteri.email}</td>
+                  <td className="px-4 py-3 border-b dark:border-white/10 capitalize hidden 2xl:table-cell">{musteri.tur}</td>
+                  <td className="px-4 py-3 border-b dark:border-white/10 hidden md:table-cell">{musteri.musteri_tur?.isim}</td>
+                  <td className="px-4 py-3 border-b dark:border-white/10 hidden md:table-cell">
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${musteri.aktif ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
                       {musteri.aktif ? 'Aktif' : 'Pasif'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 border-b border-gray-200/20 dark:border-white/10 text-center align-middle">
-                    <Link 
-                      to={`/musteriler/${musteri.id}/duzenle`} 
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 text-blue-600 dark:text-blue-400"
-                    >
-                    <svg className="fill-current w-5 h-5" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" clipRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
-                    </svg>
+                  <td className="px-4 py-3 border-b dark:border-white/10 align-middle text-center">
+                    <Link to="xxxxxxxxxx">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className='text-xs font-medium'
+                      >
+                        Sipariş oluştur
+                      </Button>
                     </Link>
                   </td>
                 </tr>

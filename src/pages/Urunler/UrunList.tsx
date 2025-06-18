@@ -4,6 +4,10 @@ import { Link } from 'react-router-dom';
 import { Modal } from "../../components/ui/modal";
 import { parseClassNames } from '@fullcalendar/core/internal';
 import { toast } from 'react-toastify';
+import Button from "../../components/ui/button/Button";
+import { PlusIcon } from "../../icons";
+import { ArrowUpIcon } from "../../icons";
+import { ArrowDownIcon } from "../../icons";
 
 interface Urun {
   id: number;
@@ -153,9 +157,6 @@ export default function UrunList() {
     }
   };
 
-
-
-
   const filteredUrunler = urunler.filter((item) => {
     const isim = item.isim?.toLocaleLowerCase('tr-TR') || '';
     const cesit = item.cesit?.toLocaleLowerCase('tr-TR') || '';
@@ -193,24 +194,30 @@ export default function UrunList() {
           />
 
           <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
-            <button
+            <Button
               onClick={() => setShowModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+              size="sm"
+              variant="outline"
+              startIcon={<PlusIcon />}
             >
-              + Yeni Ürün Ekle
-            </button>
-            <button
-              onClick={() => setShowBulkModal(true)}
-              className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+              Müşteri Ekle
+            </Button>
+            <Button
+               onClick={() => setShowBulkModal(true)}
+              size="sm"
+              variant="outline"
+              startIcon={<ArrowUpIcon />}
             >
-              📁 Toplu Yükle
-            </button>
-            <button
+              Toplu Yükle
+            </Button>
+            <Button
               onClick={handleExport}
-              className="bg-orange-400 hover:bg-orange-500 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+              size="sm"
+              variant="outline"
+              startIcon={<ArrowDownIcon />}
             >
-              Dışa Aktar
-            </button>
+              Excel İndir
+            </Button>
           </div>
         </div>
 
@@ -221,7 +228,7 @@ export default function UrunList() {
               <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Adı</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Çeşidi</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Birim</th>
-              <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-red-700 dark:text-red-300 hidden md:table-cell">Tedarik Fiyatı</th>
+              <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-red-700 dark:text-red-700 hidden md:table-cell">Tedarik Fiyatı</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-green-700 dark:text-green-300">Satış Fiyatı</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Kar Marjı</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Stok</th>
@@ -230,7 +237,7 @@ export default function UrunList() {
           <tbody>
             {filteredUrunler.length > 0 ? (
               filteredUrunler.map((urun) => (
-                <tr key={urun.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                <tr key={urun.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border dark:border-white/10">
                   <td className="p-2">
                     <Link 
                       to={`/urunler/${urun.id}`} 
@@ -241,7 +248,7 @@ export default function UrunList() {
                     </td>
                   <td className="p-2 text-center">{urun.cesit}</td>
                   <td className="p-2 text-center">{urun.birim}</td>
-                  <td className="p-2 text-center text-red-300 dark:text-red-300 hidden md:table-cell">
+                  <td className="p-2 text-center text-red-600 dark:text-red-300 hidden md:table-cell">
                     {new Intl.NumberFormat('tr-TR', {
                       minimumFractionDigits: urun.tedarik_fiyati % 1 === 0 ? 0 : 2,
                       maximumFractionDigits: 2,
@@ -279,7 +286,7 @@ export default function UrunList() {
               <td></td>
               <td></td>
               <td className="hidden md:table-cell"></td>
-              <td className="p-4 text-right font-semibold">Ortalama Kar:</td>
+              <td className="p-4 text-right font-semibold">Beklenen Kar:</td>
               <td className="p-4 text-center font-semibold text-green-700 dark:text-green-300">
                 %{ortalamaKarOrani.toFixed(2).replace('.', ',')}
               </td>

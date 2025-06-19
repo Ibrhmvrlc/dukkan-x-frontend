@@ -193,20 +193,22 @@ export default function UrunList() {
             className="w-full md:w-1/3 p-2 dark:text-white/90 border border-gray-200 rounded dark:border-white/10"
           />
 
-          <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+          <div className="flex flex-nowrap gap-2 overflow-x-auto">
             <Button
               onClick={() => setShowModal(true)}
               size="sm"
               variant="outline"
               startIcon={<PlusIcon />}
+              className="whitespace-nowrap shrink-0"
             >
               Müşteri Ekle
             </Button>
             <Button
-               onClick={() => setShowBulkModal(true)}
+              onClick={() => setShowBulkModal(true)}
               size="sm"
               variant="outline"
               startIcon={<ArrowUpIcon />}
+              className="whitespace-nowrap shrink-0"
             >
               Toplu Yükle
             </Button>
@@ -215,9 +217,14 @@ export default function UrunList() {
               size="sm"
               variant="outline"
               startIcon={<ArrowDownIcon />}
+              className="whitespace-nowrap shrink-0"
             >
               Excel İndir
             </Button>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mt-2 md:mt-0 table-cell md:hidden">{/* genis ekranlarda gizli dar ekranlarda acik */}
+            <small className='text-gray-300'>Tüm parametreleri görmek için yatay pozisyona getirin.</small>
           </div>
         </div>
 
@@ -226,7 +233,7 @@ export default function UrunList() {
           <thead className='bg-gray-100 dark:bg-white/[0.03]'>
             <tr>
               <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Adı</th>
-              <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Çeşidi</th>
+              <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Çeşidi</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Birim</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-red-700 dark:text-red-700 hidden md:table-cell">Tedarik Fiyatı</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-green-700 dark:text-green-300">Satış Fiyatı</th>
@@ -246,7 +253,7 @@ export default function UrunList() {
                     {urun.isim}
                     </Link>
                     </td>
-                  <td className="p-2 text-center">{urun.cesit}</td>
+                  <td className="p-2 text-center hidden md:table-cell">{urun.cesit}</td>
                   <td className="p-2 text-center">{urun.birim}</td>
                   <td className="p-2 text-center text-red-600 dark:text-red-300 hidden md:table-cell">
                     {new Intl.NumberFormat('tr-TR', {
@@ -284,7 +291,7 @@ export default function UrunList() {
             <tr>
               <td></td>
               <td></td>
-              <td></td>
+              <td className='hidden md:table-cell'></td>
               <td className="hidden md:table-cell"></td>
               <td className="p-4 text-right font-semibold">Beklenen Kar:</td>
               <td className="p-4 text-center font-semibold text-green-700 dark:text-green-300">

@@ -116,7 +116,7 @@ export default function MusterilerList() {
                     </span>
                   </td>
                   <td className="px-4 py-3 border-b dark:border-white/10 align-middle text-center">
-                    <Link to="xxxxxxxxxx">
+                    <Link to={`/siparisler/olustur/${musteri.id}`}>
                       <Button
                         size="sm"
                         variant="outline"

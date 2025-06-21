@@ -67,6 +67,21 @@ export default function SiparisOlustur() {
     }
   };
 
+  const updateSepetMiktar = (urunId: number, fark: number) => {
+    setSepet(prev =>
+      prev.map(item =>
+        item.urun_id === urunId
+          ? { ...item, miktar: Math.max(item.miktar + fark, 1) }
+          : item
+      )
+    );
+  };
+
+  const removeFromSepet = (urunId: number) => {
+    setSepet(prev => prev.filter(item => item.urun_id !== urunId));
+  };
+
+
   const filteredUrunler = urunler.filter(u =>
     u.isim.toLowerCase().includes(search.toLowerCase())
   );
@@ -133,21 +148,60 @@ export default function SiparisOlustur() {
         ))}
       </div>
 
-      <h2 className="text-lg font-semibold mb-2">Sepet</h2>
+      <h2 className="text-lg font-semibold mb-4">Sepet</h2>
       {sepet.length === 0 ? (
         <p className="text-sm text-gray-500">Henüz ürün seçilmedi.</p>
       ) : (
-        <ul className="mb-4">
-          {sepet.map((item, idx) => {
-            const urun = urunler.find(u => u.id === item.urun_id);
-            return (
-              <li key={idx}>
-                {urun?.isim} — {item.miktar} x {item.fiyat} ₺ = {(item.miktar * item.fiyat).toFixed(2)} ₺
-              </li>
-            );
-          })}
-        </ul>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border text-sm text-gray-800 dark:text-white/90">
+            <thead className="bg-gray-100 dark:bg-white/10">
+              <tr>
+                <th className="px-4 py-2 border-b">Ürün</th>
+                <th className="px-4 py-2 border-b text-center">Fiyat</th>
+                <th className="px-4 py-2 border-b text-center">Miktar</th>
+                <th className="px-4 py-2 border-b text-center">Ara Toplam</th>
+                <th className="px-4 py-2 border-b text-center">İşlem</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sepet.map((item, idx) => {
+                const urun = urunler.find(u => u.id === item.urun_id);
+                if (!urun) return null;
+
+                return (
+                  <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-white/5 transition">
+                    <td className="px-4 py-2 border-b">{urun.isim}</td>
+                    <td className="px-4 py-2 border-b text-center">{item.fiyat} ₺</td>
+                    <td className="px-4 py-2 border-b text-center">
+                      <div className="flex justify-center items-center gap-2">
+                        <button onClick={() => updateSepetMiktar(item.urun_id, -1)} className="px-2 bg-gray-200 rounded">−</button>
+                        <span>{item.miktar}</span>
+                        <button onClick={() => updateSepetMiktar(item.urun_id, 1)} className="px-2 bg-gray-200 rounded">+</button>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 border-b text-center">
+                      {(item.fiyat * item.miktar).toFixed(2)} ₺
+                    </td>
+                    <td className="px-4 py-2 border-b text-center">
+                      <button onClick={() => removeFromSepet(item.urun_id)} className="text-red-500 hover:underline">
+                        Kaldır
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+              <tr>
+                <td colSpan={3} className="px-4 py-2 font-semibold text-right border-t">Toplam</td>
+                <td className="px-4 py-2 text-center font-bold border-t">
+                  {sepet.reduce((acc, item) => acc + item.miktar * item.fiyat, 0).toFixed(2)} ₺
+                </td>
+                <td className="border-t"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       )}
+
 
       <Button
         onClick={handleSubmit}

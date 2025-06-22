@@ -201,7 +201,7 @@ export default function UrunList() {
               startIcon={<PlusIcon />}
               className="whitespace-nowrap shrink-0"
             >
-              Müşteri Ekle
+              Ürün Ekle
             </Button>
             <Button
               onClick={() => setShowBulkModal(true)}

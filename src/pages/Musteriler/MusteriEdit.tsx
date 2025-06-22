@@ -6,6 +6,7 @@ import MusteriGenelFaturaForm from './MusteriGenelFaturaForm';
 import MusteriYetkililerForm from './MusteriYetkililerForm';
 import MusteriTeslimatAdresleriForm from './MusteriTeslimatAdresleriForm';
 import { Link } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
@@ -198,353 +199,408 @@ export default function MusteriEdit() {
           </Link>
         </div>
       </div>
-      {/* GENEL BİLGİLER */}
-      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-              Genel Bilgiler
-            </h4>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-x-12 2xl:gap-x-20">
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Ünvan
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {musteri.unvan}
-                </p>
-              </div>
 
-               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Telefon
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {musteri.telefon}
-                </p>
-              </div>
 
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  E-posta
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {musteri.email}
-                </p>
-              </div>
 
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Müşteri Sektörü
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {musteri?.musteri_tur?.isim ?? 'Tür bilgisi yok'}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Müşteri Türü
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {capitalizeTurkish(musteri.tur)}
-                </p>
-              </div>
-
-            </div>
-          </div>
-          <button
-            onClick={() => openModal('editGenel')}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
-          >
-            <svg
-              className="fill-current"
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+      <Tabs defaultValue="ozet" className="w-full">
+        <div className="border-b border-gray-300 dark:border-gray-700">
+          <TabsList className="grid grid-cols-4 text-center">
+            <TabsTrigger
+              value="ozet"
+              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
             >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z"
-                fill=""
-              />
-            </svg>
-            Düzenle
-          </button>
-        </div>
-      </div>
-      {/* FATURA BİLGİLERİ */}
-      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-              Fatura Bilgileri
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-x-12 2xl:gap-x-20">
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Adres
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {musteri.adres}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Vergi Dairesi
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {musteri.vergi_dairesi}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Vergi Numarası
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {musteri.vergi_no}
-                </p>
-              </div>
-              
-            </div>
-          </div>
-          <button
-            onClick={() => openModal('editGenel')}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
-          >
-            <svg
-              className="fill-current"
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+              Özet Bilgiler
+            </TabsTrigger>
+            <TabsTrigger
+              value="siparisler"
+              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
             >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z"
-                fill=""
-              />
-            </svg>
-            Düzenle
-          </button>
-        </div>
-      </div>
-      <Modal isOpen={isModalOpen('editGenel')} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-          <MusteriGenelFaturaForm musteri={musteri} onSuccess={handleSuccess} />
-        </div>
-      </Modal>
-
-      {/* YETKİLİ BİLGİLERİ */}
-      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-        <div className="flex flex-col gap-6">
-          
-          <div className="flex justify-between items-center">
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-              Yetkili Bilgileri
-            </h4>
-
-            <button
-              onClick={() => openModal('editYetkili-new')}
-              className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              Siparişler
+            </TabsTrigger>
+            <TabsTrigger
+              value="finans"
+              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              Ekle
-            </button>
-          </div>
-     
-          {musteri.yetkililer && musteri.yetkililer.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {musteri.yetkililer.map((yetkili, index) => (
-                <div key={yetkili.id} className="relative border p-4 rounded-xl bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03]">
+              Finans
+            </TabsTrigger>
+            <TabsTrigger
+              value="destek"
+              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
+            >
+              Destek
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-                  {/* Sağ üst köşe icon grubu */}
-                  <div className="absolute top-2 right-2 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-900 border border-t-0 border-gray-300 dark:border-gray-700 rounded-b-xl p-6">
+          <TabsContent value="ozet">
+            {/* GENEL BİLGİLER */}
+            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
+                    Genel Bilgiler
+                  </h4>
 
-                    {/* Düzenle İkon Butonu */}
-                    <button
-                      onClick={() => openModal(`editYetkili-${yetkili.id}`)}
-                      className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/[0.05]"
-                      title="Düzenle"
-                    >
-                      <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 11l3 3 8-8-3-3-8 8z" />
-                      </svg>
-                    </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-x-12 2xl:gap-x-20">
+                    <div>
+                      <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                        Ünvan
+                      </p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                        {musteri.unvan}
+                      </p>
+                    </div>
 
-                    {/* Sil İkon Butonu */}
-                    <button
-                      onClick={() => handleDelete(yetkili.id)}
-                      className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-600/20"
-                      title="Sil"
-                    >
-                      <svg className="w-4 h-4 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7L5 7M10 11V17M14 11V17M5 7L6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19L19 7Z" />
-                      </svg>
-                    </button>
+                    <div>
+                      <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                        Telefon
+                      </p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                        {musteri.telefon}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                        E-posta
+                      </p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                        {musteri.email}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                        Müşteri Sektörü
+                      </p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                        {musteri?.musteri_tur?.isim ?? 'Tür bilgisi yok'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                        Müşteri Türü
+                      </p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                        {capitalizeTurkish(musteri.tur)}
+                      </p>
+                    </div>
 
                   </div>
-
-                  {/* Kart İçeriği */}
-                  <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-                    Yetkili {index + 1}
-                  </p>
-
-                  <p className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-1">
-                    {yetkili.isim}
-                  </p>
-
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    {yetkili.telefon ?? '-'} {yetkili.email ? ` / ${yetkili.email}` : ''}
-                  </p>
-
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {yetkili.pozisyon ?? ''}
-                  </p>
-
-                  {/* Modal */}
-                  <Modal isOpen={isModalOpen(`editYetkili-${yetkili.id}`)} onClose={closeModal} className="max-w-[700px] m-4">
-                    <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-                      <div className="px-2">
-                        <MusteriYetkililerForm
-                          musteriId={musteri.id}
-                          form={yetkili}
-                          onSuccess={handleSuccess}
-                        />
-                      </div>
-                    </div>
-                  </Modal>
-
                 </div>
-              ))}
+                <button
+                  onClick={() => openModal('editGenel')}
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
+                >
+                  <svg
+                    className="fill-current"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z"
+                      fill=""
+                    />
+                  </svg>
+                  Düzenle
+                </button>
+              </div>
             </div>
-          ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400">Yetkili bilgisi yok</p>
-          )}
-        </div>
-      </div>
+            {/* FATURA BİLGİLERİ */}
+            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
+                    Fatura Bilgileri
+                  </h4>
 
-      {/* YENİ YETKİLİ MODALI */}
-      <Modal isOpen={isModalOpen('editYetkili-new')} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-          <div className="px-2">
-            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              <MusteriYetkililerForm
-                musteriId={musteri.id}
-                onSuccess={() => {
-                  handleSuccess();
-                  closeModal();
-                }}
-              />
-            </p>
-          </div>
-        </div>
-      </Modal>
-
-
-      {/* TESLİMAT BİLGİLERİ */}
-      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-        <div className="flex flex-col gap-6">
-          <div>
-            <div className="flex justify-between items-center">
-              <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-                Teslimat Bilgileri
-              </h4>
-              <button
-                onClick={() => openModal('editTeslimat-new')}
-                className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Ekle
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-x-12 2xl:gap-x-20">
-              {musteri.teslimat_adresleri && musteri.teslimat_adresleri.length > 0 ? (
-                musteri.teslimat_adresleri.map((adres, index) => (
-                  <div key={adres.id} className="relative border p-4 rounded-xl bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03]">
-                    <div className="absolute top-2 right-2 flex items-center gap-2">
-                      <button
-                          onClick={() => {
-                            setSelectedAdres(adres);  // adresi state’e kaydet
-                            openModal('editTeslimat');
-                          }}
-                          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/[0.05]"
-                          title="Düzenle"
-                        >
-                        <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 11l3 3 8-8-3-3-8 8z" />
-                        </svg>
-                      </button>
-
-                      <button
-                        onClick={() => handleTADelete(adres.id)}
-                        className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-600/20"
-                        title="Sil"
-                      >
-                        <svg className="w-4 h-4 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7L5 7M10 11V17M14 11V17M5 7L6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19L19 7Z" />
-                        </svg>
-                      </button>
-                    </div>
-                    <p className="mb-3 text-xs font-medium text-gray-500 dark:text-gray-400">
-                      {adres.baslik ?? ''}
-                    </p>
-                    <p className="text-sm font-semibold text-gray-800 dark:text-white/90">{adres.adres}</p>
-                    {(adres.ilce || adres.il || adres.posta_kodu) && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {adres.ilce ?? ''} {adres.il ? `, ${adres.il}` : ''} {adres.posta_kodu ? `(${adres.posta_kodu})` : ''}
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-x-12 2xl:gap-x-20">
+                    <div>
+                      <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                        Adres
                       </p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                        {musteri.adres}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                        Vergi Dairesi
+                      </p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                        {musteri.vergi_dairesi}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                        Vergi Numarası
+                      </p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                        {musteri.vergi_no}
+                      </p>
+                    </div>
+                    
+                  </div>
+                </div>
+                <button
+                  onClick={() => openModal('editGenel')}
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
+                >
+                  <svg
+                    className="fill-current"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z"
+                      fill=""
+                    />
+                  </svg>
+                  Düzenle
+                </button>
+              </div>
+            </div>
+            <Modal isOpen={isModalOpen('editGenel')} onClose={closeModal} className="max-w-[700px] m-4">
+              <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+                <MusteriGenelFaturaForm musteri={musteri} onSuccess={handleSuccess} />
+              </div>
+            </Modal>
+
+            {/* YETKİLİ BİLGİLERİ */}
+            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                    Yetkili Bilgileri
+                  </h4>
+
+                  <button
+                    onClick={() => openModal('editYetkili-new')}
+                    className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Ekle
+                  </button>
+                </div>
+          
+                {musteri.yetkililer && musteri.yetkililer.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {musteri.yetkililer.map((yetkili, index) => (
+                      <div key={yetkili.id} className="relative border p-4 rounded-xl bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03]">
+
+                        {/* Sağ üst köşe icon grubu */}
+                        <div className="absolute top-2 right-2 flex items-center gap-2">
+
+                          {/* Düzenle İkon Butonu */}
+                          <button
+                            onClick={() => openModal(`editYetkili-${yetkili.id}`)}
+                            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/[0.05]"
+                            title="Düzenle"
+                          >
+                            <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 11l3 3 8-8-3-3-8 8z" />
+                            </svg>
+                          </button>
+
+                          {/* Sil İkon Butonu */}
+                          <button
+                            onClick={() => handleDelete(yetkili.id)}
+                            className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-600/20"
+                            title="Sil"
+                          >
+                            <svg className="w-4 h-4 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7L5 7M10 11V17M14 11V17M5 7L6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19L19 7Z" />
+                            </svg>
+                          </button>
+
+                        </div>
+
+                        {/* Kart İçeriği */}
+                        <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                          Yetkili {index + 1}
+                        </p>
+
+                        <p className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-1">
+                          {yetkili.isim}
+                        </p>
+
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                          {yetkili.telefon ?? '-'} {yetkili.email ? ` / ${yetkili.email}` : ''}
+                        </p>
+
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {yetkili.pozisyon ?? ''}
+                        </p>
+
+                        {/* Modal */}
+                        <Modal isOpen={isModalOpen(`editYetkili-${yetkili.id}`)} onClose={closeModal} className="max-w-[700px] m-4">
+                          <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+                            <div className="px-2">
+                              <MusteriYetkililerForm
+                                musteriId={musteri.id}
+                                form={yetkili}
+                                onSuccess={handleSuccess}
+                              />
+                            </div>
+                          </div>
+                        </Modal>
+
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Yetkili bilgisi yok</p>
+                )}
+              </div>
+            </div>
+            <Modal isOpen={isModalOpen('editYetkili-new')} onClose={closeModal} className="max-w-[700px] m-4">
+              <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+                <div className="px-2">
+                  <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
+                    <MusteriYetkililerForm
+                      musteriId={musteri.id}
+                      onSuccess={() => {
+                        handleSuccess();
+                        closeModal();
+                      }}
+                    />
+                  </p>
+                </div>
+              </div>
+            </Modal>
+
+
+            {/* TESLİMAT BİLGİLERİ */}
+            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+              <div className="flex flex-col gap-6">
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
+                      Teslimat Bilgileri
+                    </h4>
+                    <button
+                      onClick={() => openModal('editTeslimat-new')}
+                      className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Ekle
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-x-12 2xl:gap-x-20">
+                    {musteri.teslimat_adresleri && musteri.teslimat_adresleri.length > 0 ? (
+                      musteri.teslimat_adresleri.map((adres, index) => (
+                        <div key={adres.id} className="relative border p-4 rounded-xl bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03]">
+                          <div className="absolute top-2 right-2 flex items-center gap-2">
+                            <button
+                                onClick={() => {
+                                  setSelectedAdres(adres);  // adresi state’e kaydet
+                                  openModal('editTeslimat');
+                                }}
+                                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/[0.05]"
+                                title="Düzenle"
+                              >
+                              <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 11l3 3 8-8-3-3-8 8z" />
+                              </svg>
+                            </button>
+
+                            <button
+                              onClick={() => handleTADelete(adres.id)}
+                              className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-600/20"
+                              title="Sil"
+                            >
+                              <svg className="w-4 h-4 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7L5 7M10 11V17M14 11V17M5 7L6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19L19 7Z" />
+                              </svg>
+                            </button>
+                          </div>
+                          <p className="mb-3 text-xs font-medium text-gray-500 dark:text-gray-400">
+                            {adres.baslik ?? ''}
+                          </p>
+                          <p className="text-sm font-semibold text-gray-800 dark:text-white/90">{adres.adres}</p>
+                          {(adres.ilce || adres.il || adres.posta_kodu) && (
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {adres.ilce ?? ''} {adres.il ? `, ${adres.il}` : ''} {adres.posta_kodu ? `(${adres.posta_kodu})` : ''}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Kayıtlı teslimat adresi yok.</p>
                     )}
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500 dark:text-gray-400">Kayıtlı teslimat adresi yok.</p>
-              )}
+                </div>
+              </div>
             </div>
-          </div>
+            <Modal isOpen={isModalOpen('editTeslimat')} onClose={closeModal} className="max-w-[700px] m-4">
+              <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+                <div className="px-2 pr-4">
+                    <MusteriTeslimatAdresleriForm
+                      musteriId={musteri.id}
+                      form={selectedAdres ?? undefined}  // burası artık state
+                      onSuccess={() => {
+                        handleSuccess();
+                        closeModal();
+                      }}
+                  />
+                </div>
+              </div>
+            </Modal>
+            <Modal isOpen={isModalOpen('editTeslimat-new')} onClose={closeModal} className="max-w-[700px] m-4">
+              <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+                <div className="px-2 pr-4">
+                    <MusteriTeslimatAdresleriForm
+                      musteriId={musteri.id}
+                      form={undefined}  // burası artık state
+                      onSuccess={() => {
+                        handleSuccess();
+                        closeModal();
+                      }}
+                  />
+                </div>
+              </div>
+            </Modal>
+          </TabsContent>
+          <TabsContent value="siparisler">
+            {/* Sipariş içeriği */}
+          </TabsContent>
+          <TabsContent value="finans">
+            {/* Finans içeriği */}
+          </TabsContent>
+          <TabsContent value="destek">
+            {/* Destek içeriği */}
+          </TabsContent>
         </div>
-      </div>
-      <Modal isOpen={isModalOpen('editTeslimat')} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-          <div className="px-2 pr-4">
-              <MusteriTeslimatAdresleriForm
-                musteriId={musteri.id}
-                form={selectedAdres ?? undefined}  // burası artık state
-                onSuccess={() => {
-                  handleSuccess();
-                  closeModal();
-                }}
-            />
-          </div>
-        </div>
-      </Modal>
-      <Modal isOpen={isModalOpen('editTeslimat-new')} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-          <div className="px-2 pr-4">
-              <MusteriTeslimatAdresleriForm
-                musteriId={musteri.id}
-                form={undefined}  // burası artık state
-                onSuccess={() => {
-                  handleSuccess();
-                  closeModal();
-                }}
-            />
-          </div>
-        </div>
-      </Modal>
+      </Tabs>
+
+
+
+
+
+
+
+
+
+      
     </div>
   </>
   );

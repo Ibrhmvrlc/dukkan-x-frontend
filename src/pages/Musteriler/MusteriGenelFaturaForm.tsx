@@ -14,7 +14,7 @@ import VergiDairesiInput from '../../components/musteriler/VergiDairesiInput';
 interface Musteri {
   id?: number;
   unvan: string;
-  tur: 'bireysel' | 'kurumsal';
+  tur: 'bireysel' | 'kurumsal'; // string değil!
   telefon?: string;
   email?: string;
   adres?: string;
@@ -65,12 +65,16 @@ export default function MusteriGenelFaturaForm({
   const handleInternalChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
+
     setInternalForm(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' && 'checked' in e.target
+        ? (e.target as HTMLInputElement).checked
+        : value,
     }));
   };
+
 
   const handleInternalTelefonChange = (val: string) => {
     setInternalForm(prev => ({
@@ -131,7 +135,7 @@ export default function MusteriGenelFaturaForm({
 
         {!controlled && (
           <div className="flex justify-end">
-            <Button type="submit" size="md" variant="primary">
+            <Button size="md" variant="primary">
               {'Kaydet'}
             </Button>
           </div>

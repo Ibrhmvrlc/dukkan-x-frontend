@@ -2,7 +2,7 @@ import React from 'react';
 
 interface TeslimatAdresTextareaProps {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   name?: string;
   label?: string;
   required?: boolean;

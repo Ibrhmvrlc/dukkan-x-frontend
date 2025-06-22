@@ -75,46 +75,40 @@ export default function SiparisOlustur() {
     setSepet(prev => prev.filter(item => item.urun_id !== urunId));
   };
 
+  // Siparişi gönder
   const handleSubmit = async () => {
     try {
-      await axios.post('/v1/siparisler', {
+      const res = await axios.post('/v1/siparisler', {
         musteri_id: musteriId,
-        urunler: sepet,
+        urunler: sepet.map(item => ({
+          urun_id: item.urun_id,
+          miktar: item.miktar,
+          fiyat: item.fiyat,
+        })),
         yetkili_id: yetkiliId,
         kdv: 10,
         iskonto: 0,
         not: not,
-        teslimat_adresi_id: teslimatAdresiId
+        teslimat_adresi_id: teslimatAdresiId,
       });
 
-      toast.success('Sipariş başarıyla oluşturuldu!', { position: 'top-right' });
-      navigate('/siparisler');
+      if (!yetkiliId || !teslimatAdresiId) {
+        toast.error('Lütfen yetkili ve teslimat adresi seçin.', { position: 'top-right' });
+        return;
+      }
 
+      toast.success('Sipariş başarıyla oluşturuldu!', { position: 'top-right' });
+      navigate(`/siparisler/${res.data.siparis_id}`); // İstersen listeye de dönebilirsin
     } catch (error: any) {
       console.error("Sipariş oluşturulamadı:", error);
+      const status = error.response?.status;
 
-      // Axios hatası
-      if (error.response) {
-        const status = error.response.status;
-
-        // Laravel validasyon hatası
-        if (status === 422) {
-          const validationErrors = error.response.data.errors;
-          const firstError = validationErrors[Object.keys(validationErrors)[0]][0];
-          toast.error(`Doğrulama Hatası: ${firstError}`, { position: 'top-right' });
-        }
-
-        // Laravel genel hata
-        else if (status === 500) {
-          toast.error('Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.', { position: 'top-right' });
-        }
-
-        // Diğer HTTP hataları
-        else {
-          const message = error.response.data.message || 'Bir hata oluştu.';
-          toast.error(`Hata: ${message}`, { position: 'top-right' });
-        }
-
+      if (status === 422) {
+        const validationErrors = error.response.data.errors;
+        const firstError = validationErrors[Object.keys(validationErrors)[0]][0];
+        toast.error(`Doğrulama Hatası: ${firstError}`, { position: 'top-right' });
+      } else if (status === 500) {
+        toast.error('Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.', { position: 'top-right' });
       } else if (error.request) {
         toast.error('Sunucuya ulaşılamıyor. İnternet bağlantınızı kontrol edin.', { position: 'top-right' });
       } else {
@@ -122,6 +116,7 @@ export default function SiparisOlustur() {
       }
     }
   };
+
 
   const filteredUrunler = urunler.filter(u =>
     u.isim.toLowerCase().includes(search.toLowerCase())
@@ -150,14 +145,14 @@ export default function SiparisOlustur() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4">
-      <div className="lg:col-span-2 space-y-4">
-        <div className="sticky top-9 bg-white dark:bg-gray-900 z-10 p-2 rounded shadow">
+      <div className="lg:col-span-2 space-y-4 dark:text-gray-100">
+        <div className="sticky top-9 bg-white dark:bg-gray-900 z-10 rounded shadow">
           <h1 className="text-lg font-bold">Sipariş Oluştur</h1>
           <small>{musteri.unvan}</small>
           <input
             type="text"
             placeholder="Ürün ara..."
-            className="w-full mt-2 p-2 border rounded dark:bg-gray-800 dark:text-white"
+            className="w-full mt-2 p-2 border rounded dark:bg-gray-800 dark:text-white dark:border-gray-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -165,15 +160,15 @@ export default function SiparisOlustur() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredUrunler.map(urun => (
-            <div key={urun.id} className="border p-4 rounded shadow bg-white dark:bg-gray-800">
+            <div key={urun.id} className="border p-4 rounded shadow bg-white dark:bg-gray-800 dark:border-gray-500">
               <p className="font-semibold truncate" title={urun.isim}>{urun.isim}</p>
               <p className="text-sm text-gray-500">{urun.cesit}</p>
               <p className="text-green-600 font-bold">{urun.satis_fiyati} ₺</p>
               <p className="text-xs text-gray-500">Stok: {urun.stok_miktari}</p>
               <div className="flex items-center gap-2 mt-3">
-                <button onClick={() => handleMiktarDegistir(urun.id, -1)} className="px-2 py-1 bg-gray-300 rounded">−</button>
+                <button onClick={() => handleMiktarDegistir(urun.id, -1)} className="px-2 py-1 bg-gray-300 rounded dark:text-gray-800">−</button>
                 <span>{miktarlar[urun.id] || 1}</span>
-                <button onClick={() => handleMiktarDegistir(urun.id, 1)} className="px-2 py-1 bg-gray-300 rounded">+</button>
+                <button onClick={() => handleMiktarDegistir(urun.id, 1)} className="px-2 py-1 bg-gray-300 rounded dark:text-gray-800">+</button>
               </div>
               <Button onClick={() => handleSepeteEkle(urun.id)} className="mt-3 w-full">Sepete Ekle</Button>
             </div>
@@ -181,7 +176,7 @@ export default function SiparisOlustur() {
         </div>
       </div>
 
-      <div className="sticky top-19 h-fit bg-white dark:bg-gray-900 p-4 border rounded shadow">
+      <div className="sticky top-19 h-fit bg-white dark:bg-gray-900 p-4 border rounded shadow dark:text-gray-100 dark:border-gray-500">
         <small>{musteri.unvan}</small>
         <h2 className="text-lg font-semibold mb-4">Sepet</h2>
         {sepet.length === 0 ? (
@@ -200,9 +195,9 @@ export default function SiparisOlustur() {
                     <p className="text-xs text-gray-500 truncate">{item.miktar} x {item.fiyat} ₺</p>
                   </div>
                   <div className="flex items-center gap-1 ml-2">
-                    <button onClick={() => updateSepetMiktar(item.urun_id, -1)} className="px-2 bg-gray-200 rounded">−</button>
+                    <button onClick={() => updateSepetMiktar(item.urun_id, -1)} className="px-2 bg-gray-200 rounded dark:text-gray-800">−</button>
                     <span>{item.miktar}</span>
-                    <button onClick={() => updateSepetMiktar(item.urun_id, 1)} className="px-2 bg-gray-200 rounded">+</button>
+                    <button onClick={() => updateSepetMiktar(item.urun_id, 1)} className="px-2 bg-gray-200 rounded dark:text-gray-800">+</button>
                   </div>
                   <button onClick={() => removeFromSepet(item.urun_id)} className="text-red-500 text-xs ml-2">✕</button>
                 </div>
@@ -224,9 +219,12 @@ export default function SiparisOlustur() {
             />
 
             <select
-              className="w-full mt-2 p-2 border rounded text-sm"
+              className="w-full mt-2 p-2 border rounded text-sm bg-gray-900"
               value={teslimatAdresiId ?? ''}
-              onChange={(e) => setTeslimatAdresiId(Number(e.target.value))}
+             onChange={(e) => {
+                const val = Number(e.target.value);
+                setTeslimatAdresiId(!isNaN(val) ? val : null);
+              }}
             >
               <option value="" disabled>⟶ Teslimat adresi seçin</option>
               {teslimatAdresleri.map(adres => (
@@ -237,9 +235,13 @@ export default function SiparisOlustur() {
             </select>
 
             <select
-              className="w-full mt-2 p-2 border rounded text-sm"
+              className="w-full mt-2 p-2 border rounded text-sm bg-gray-900"
               value={yetkiliId ?? ''}
-              onChange={(a) => setYetkiliId(Number(a.target.value))}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                setYetkiliId(!isNaN(val) ? val : null);
+              }}
+
             >
               <option value="" disabled>⟶ Yetkili Seçin</option>
               {yetkililer.map(yetkili => (

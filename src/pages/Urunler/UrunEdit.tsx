@@ -55,20 +55,18 @@ export default function UrunEdit() {
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
 
-    let newValue: string | number | boolean | null = value;
+    let newValue: string | number | boolean | null;
 
-    // Checkbox (örneğin: aktif)
-    if (type === "checkbox") {
-      newValue = checked;
-    }
-
-    // Sayısal alanlar
-    if (
+    if (type === "checkbox" && "checked" in e.target) {
+      newValue = (e.target as HTMLInputElement).checked;
+    } else if (
       ['satis_fiyati', 'tedarik_fiyati', 'stok_miktari', 'kritik_stok', 'kdv_orani'].includes(name)
     ) {
       newValue = value === '' ? null : Number(value);
+    } else {
+      newValue = value;
     }
 
     setForm((prevForm) => ({
@@ -76,6 +74,7 @@ export default function UrunEdit() {
       [name]: newValue,
     }));
   };
+
 
   const handleSave = async () => {
     console.log("Kaydedilecek form:", form); // BURAYI EKLE

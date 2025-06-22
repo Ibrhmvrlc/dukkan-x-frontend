@@ -2,7 +2,6 @@ import { useEffect, useState, ChangeEvent } from 'react';
 import axios from '../../api/axios';
 import { Link } from 'react-router-dom';
 import { Modal } from "../../components/ui/modal";
-import { parseClassNames } from '@fullcalendar/core/internal';
 import { toast } from 'react-toastify';
 import Button from "../../components/ui/button/Button";
 import { PlusIcon } from "../../icons";

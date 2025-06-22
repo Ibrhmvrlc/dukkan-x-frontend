@@ -55,18 +55,21 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
 
   // Form verisini unified şekilde alıyoruz
   const finalForm: Yetkili = props.controlled 
-    ? (props.form ?? { isim: '', telefon: '', email: '', pozisyon: '', musteri_id: props.musteriId })
-    : internalForm;
+  ? (props.form ?? { isim: '', telefon: '', email: '', pozisyon: '', musteri_id: props.musteriId })
+  : internalForm;
 
   const handleInternalChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
     setInternalForm(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' && 'checked' in e.target
+        ? (e.target as HTMLInputElement).checked
+        : value,
     }));
   };
+
 
   const handleInternalTelefonChange = (val: string) => {
     setInternalForm(prev => ({
@@ -88,7 +91,7 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
         await axios.post(`/v1/yetkililer`, { ...internalForm, musteri_id: props.musteriId }, config);
       }
 
-      props.onSuccess?.();
+      !props.controlled && props.onSuccess?.();
     } catch (err: any) {
       console.error('Kayıt hatası:', err.response?.data || err.message);
     }
@@ -129,7 +132,7 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
 
         {!props.controlled && (
           <div className="flex justify-end">
-            <Button type="submit" size="md" variant="primary">
+            <Button size="md" variant="primary">
               {'Kaydet'}
             </Button>
           </div>

@@ -69,7 +69,7 @@ export default function YeniUrun() {
         ))}
 
         <div className="flex justify-end mt-4">
-          <Button type="submit">Kaydet</Button>
+          <Button>Kaydet</Button>
         </div>
       </form>
     </div>

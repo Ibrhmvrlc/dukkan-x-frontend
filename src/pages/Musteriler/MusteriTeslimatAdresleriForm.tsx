@@ -53,7 +53,7 @@ export default function MusteriTeslimatAdresleriForm(props: MusteriTeslimatAdres
       : axios.post(`/v1/musteriler/${props.musteriId}/teslimat-adresleri`, { ...finalForm, musteri_id: props.musteriId });
 
     request.then(() => {
-      props.onSuccess?.();
+      !props.controlled && props.onSuccess?.();
     });
   };
 
@@ -96,7 +96,7 @@ export default function MusteriTeslimatAdresleriForm(props: MusteriTeslimatAdres
 
         {!props.controlled && (
           <div className="flex justify-end mt-4">
-            <Button type="submit" size="md" variant="primary">
+            <Button size="md" variant="primary">
               {'Kaydet'}
             </Button>
           </div>

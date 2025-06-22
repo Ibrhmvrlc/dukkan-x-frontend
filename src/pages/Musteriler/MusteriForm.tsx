@@ -84,12 +84,19 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
   const handleYetkiliChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value, type, checked } = e.target;
-    setYetkili(prev => ({
+    const { name, value } = e.target;
+
+    const updatedValue =
+      e.target instanceof HTMLInputElement && e.target.type === 'checkbox'
+        ? e.target.checked
+        : value;
+
+    setYetkili((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: updatedValue,
     }));
   };
+
 
   const handleYetkiliTelefonChange = (val: string) => {
     setYetkili(prev => ({
@@ -114,12 +121,19 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
+
+    const updatedValue =
+      e.target instanceof HTMLInputElement && e.target.type === 'checkbox'
+        ? e.target.checked
+        : value;
+
     setForm((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: updatedValue,
     }));
   };
+
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -201,7 +215,6 @@ export default function MusteriForm({ musteri, onSuccess }: MusteriFormProps) {
 
       <div className="flex justify-end">
         <Button
-          type="submit"
           size="md"
           variant="primary"
         >

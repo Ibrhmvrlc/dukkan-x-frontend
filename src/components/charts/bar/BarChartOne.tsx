@@ -2,7 +2,7 @@ import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 
 
-export default function BarChartOne({ data }: { data: number[] }) {
+export default function BarChartOne({ data = [] }: { data?: number[] }) {
   const options: ApexOptions = {
     colors: ["#465fff"],
     chart: {

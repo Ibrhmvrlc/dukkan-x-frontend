@@ -7,6 +7,8 @@ import MusteriYetkililerForm from './MusteriYetkililerForm';
 import MusteriTeslimatAdresleriForm from './MusteriTeslimatAdresleriForm';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import SiparisListesi from '../../pages/Siparisler/SiparisListesi';
+
 
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
@@ -168,7 +170,7 @@ export default function MusteriEdit() {
 
     <div className="space-y-6">
       {/* PROFİL */}
-      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+      <div className="bg-white dark:bg-gray-900 p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           {/* Sol taraf */}
           <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
@@ -204,7 +206,7 @@ export default function MusteriEdit() {
 
 
       <Tabs defaultValue="ozet" className="w-full">
-        <div className="border-b border-gray-300 dark:border-gray-700">
+        <div className="">
           <TabsList className="grid grid-cols-4 text-center">
             <TabsTrigger
               value="ozet"
@@ -233,10 +235,10 @@ export default function MusteriEdit() {
           </TabsList>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 border border-t-0 border-gray-300 dark:border-gray-700 rounded-b-xl p-6">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-b-xl p-6 rounded-xl">
           <TabsContent value="ozet">
             {/* GENEL BİLGİLER */}
-            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6 mb-3">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
@@ -315,7 +317,7 @@ export default function MusteriEdit() {
               </div>
             </div>
             {/* FATURA BİLGİLERİ */}
-            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6 mb-3">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
@@ -382,7 +384,7 @@ export default function MusteriEdit() {
             </Modal>
 
             {/* YETKİLİ BİLGİLERİ */}
-            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6 mb-3">
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center">
                   <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
@@ -486,7 +488,6 @@ export default function MusteriEdit() {
               </div>
             </Modal>
 
-
             {/* TESLİMAT BİLGİLERİ */}
             <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
               <div className="flex flex-col gap-6">
@@ -581,7 +582,10 @@ export default function MusteriEdit() {
             </Modal>
           </TabsContent>
           <TabsContent value="siparisler">
-            {/* Sipariş içeriği */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Siparişler</h3>
+              <SiparisListesi musteriId={musteri.id!} />
+            </div>
           </TabsContent>
           <TabsContent value="finans">
             {/* Finans içeriği */}
@@ -591,15 +595,6 @@ export default function MusteriEdit() {
           </TabsContent>
         </div>
       </Tabs>
-
-
-
-
-
-
-
-
-
       
     </div>
   </>

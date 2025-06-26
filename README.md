@@ -190,3 +190,9 @@ TailAdmin React.js Free Version is released under the MIT License.
 
 If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing
 and maintaining this template.
+
+## PWA and Offline Support
+
+This project is now configured as a Progressive Web App. When the application is
+installed, it can work offline. Any API requests made while offline are queued
+locally and automatically sent once the connection is restored.

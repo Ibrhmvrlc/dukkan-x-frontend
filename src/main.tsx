@@ -7,6 +7,11 @@ import App from "./App.tsx";
 import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { AuthProvider } from './context/AuthContext';
+import { registerSW } from 'virtual:pwa-register';
+import { registerFlushOnOnline } from './lib/offlineQueue';
+
+registerSW({ immediate: true });
+registerFlushOnOnline();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

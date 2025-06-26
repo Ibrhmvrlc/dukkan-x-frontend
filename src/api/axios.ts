@@ -1,4 +1,5 @@
 import axios from "axios";
+import { saveRequest } from "../lib/offlineQueue";
 
 const instance = axios.create({
   baseURL: "http://localhost:8000/api",
@@ -17,6 +18,15 @@ instance.interceptors.request.use((config) => {
   config.headers.Accept = "application/json";
 
   console.log("[Axios Request] Final request config headers:", config.headers);
+  if (!navigator.onLine) {
+    saveRequest({
+      url: config.url || '',
+      method: config.method || 'get',
+      data: config.data,
+      headers: config.headers,
+    });
+    return Promise.reject(new axios.Cancel('offline'));
+  }
   return config;
 });
 
@@ -25,6 +35,16 @@ instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    if (!navigator.onLine || error.message === 'Network Error') {
+      saveRequest({
+        url: originalRequest.url || '',
+        method: originalRequest.method || 'get',
+        data: originalRequest.data,
+        headers: originalRequest.headers,
+      });
+      return Promise.resolve({ data: null });
+    }
 
     if (
       error.response?.status === 401 &&

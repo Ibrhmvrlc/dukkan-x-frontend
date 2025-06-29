@@ -44,10 +44,12 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
             const genelToplam = toplamTutar + kdvTutari - iskontoTutari;
 
             return (
-            <div
-                key={siparis.id}
-                className="flex flex-col justify-between border p-4 rounded shadow bg-white dark:bg-gray-900 dark:text-gray-100"
-            >
+                <div
+                  key={siparis.id}
+                  className="flex flex-col justify-between border p-4 rounded shadow bg-white dark:bg-gray-900 dark:text-gray-100
+                            max-h-none overflow-visible sm:max-h-[400px] sm:overflow-y-auto"
+                            style={{ scrollbarWidth: "thin", scrollbarColor: "#888 #f1f1f1" }}
+                >
                 <div className="mb-2">
                     <h2 className="text-lg font-semibold">Sipariş #{siparis.id}</h2>
                     <p className="text-xs text-gray-400">{siparis.tarih?.split("T")[0]}</p>

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
-import { toast } from 'react-toastify';
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
@@ -21,10 +20,8 @@ export default function SignInForm() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password); // context içindeki login fonksiyonu
-
-      toast.success("Hoşgeldiniz!");
-      navigate('/'); // yönlendirme
+      await login(email, password, navigate);
+      // ❌ toast ve navigate artık login içinde var, burada gerek yok
     } catch (error: any) {
       alert("Giriş başarısız: " + (error.response?.data?.error || "Sunucu hatası"));
     }

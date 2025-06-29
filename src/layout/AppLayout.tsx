@@ -12,6 +12,10 @@ const LayoutContent: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
+    // 🔐 Offline token ise süresini kontrol etmeye gerek yok
+    if (token === "offline-token") return;
+
     if (!token) {
       logout();
       return;
@@ -27,7 +31,8 @@ const LayoutContent: React.FC = () => {
     } catch {
       logout();
     }
-  }, [user]); // user değiştiğinde tetiklensin
+  }, [user]);
+
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (

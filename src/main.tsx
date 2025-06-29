@@ -1,8 +1,3 @@
-// TS için type declaration
-/// <reference types="vite/client" />
-/// <reference types="vite-plugin-pwa/client" />
-import { registerSW } from 'virtual:pwa-register';
-
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
@@ -13,19 +8,19 @@ import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { AuthProvider } from './context/AuthContext';
 
-import { registerFlushOnOnline } from './lib/offlineQueue';
-
-registerSW({ immediate: true });
-registerFlushOnOnline();
+// ✅ React Router burada tanımlanıyor
+import { BrowserRouter } from 'react-router-dom';
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider>
-      <AppWrapper>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </AppWrapper>
-    </ThemeProvider>
-  </StrictMode>,
+    <BrowserRouter>
+      <ThemeProvider>
+        <AppWrapper>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </AppWrapper>
+      </ThemeProvider>
+    </BrowserRouter>
+  </StrictMode>
 );

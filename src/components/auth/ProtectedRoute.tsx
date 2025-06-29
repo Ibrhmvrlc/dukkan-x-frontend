@@ -3,12 +3,14 @@ import { useAuth } from "../../context/AuthContext";
 import { ReactNode } from "react";
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
-  const token = localStorage.getItem("token");
+  const { authenticated, loading } = useAuth();
 
-  if (loading) return <div>Yükleniyor...</div>; // ✴️ Sayfa yüklenmesin
+  if (loading) {
+    return <div className="text-center p-6">Yükleniyor...</div>;
+  }
 
-  if (!token || !user) {
+  // ⚠️ Authenticated false olursa yönlendir
+  if (!authenticated) {
     return <Navigate to="/signin" replace />;
   }
 

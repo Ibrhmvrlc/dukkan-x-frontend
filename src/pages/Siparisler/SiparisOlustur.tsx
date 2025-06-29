@@ -219,7 +219,7 @@ export default function SiparisOlustur() {
             />
 
             <select
-              className="w-full mt-2 p-2 border rounded text-sm bg-gray-900"
+              className="w-full mt-2 p-2 border rounded text-sm dark:bg-gray-900"
               value={teslimatAdresiId ?? ''}
              onChange={(e) => {
                 const val = Number(e.target.value);
@@ -235,7 +235,7 @@ export default function SiparisOlustur() {
             </select>
 
             <select
-              className="w-full mt-2 p-2 border rounded text-sm bg-gray-900"
+              className="w-full mt-2 p-2 border rounded text-sm dark:bg-gray-900"
               value={yetkiliId ?? ''}
               onChange={(e) => {
                 const val = Number(e.target.value);

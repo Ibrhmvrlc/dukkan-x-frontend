@@ -1,5 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import axios from '../api/axios';
+import { initDB } from '../lib/db';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: number;
@@ -11,13 +14,15 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  authenticated: boolean;
+  login: (email: string, password: string, navigate?: (to: string) => void) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  authenticated: false,
   login: async () => {},
   logout: () => {},
 });
@@ -25,50 +30,121 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  const alreadyChecked = useRef(false);
 
-  const logout = () => {
+  const logout = async () => {
+    console.warn("LOGOUT ÇAĞRILDI");
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
-    window.location.href = '/signin';
+    setAuthenticated(false);
+
+    // ❌ IndexedDB'i silmiyoruz
+    // const db = await initDB();
+    // await db.delete('auth', 'token');
+    // await db.clear('users');
+
+    navigate('/signin', { replace: true });
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const checkLogin = async () => {
+      if (alreadyChecked.current) return;
+      alreadyChecked.current = true;
 
-    if (!token) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
+      console.log("🧠 checkLogin() tetiklendi");
 
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const db = await initDB();
+      const token = localStorage.getItem("token");
 
-    axios
-      .get('/me')
-      .then((res) => setUser(res.data))
-      .catch((error) => {
-        setUser(null);
-        if (error.response?.status === 401) {
-          logout();
+      // 1️⃣ Online kontrol
+      if (token && token !== 'offline-token') {
+        try {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          const me = await axios.get('/me');
+
+          setUser(me.data);
+          setAuthenticated(true);
+          await db.put('users', me.data);
+
+          console.log("✅ Online oturum açıldı");
+          setLoading(false);
+          return;
+        } catch (err) {
+          console.warn("🌐 Online token ile me başarısız, offline denenecek");
+          // devam et
         }
-      })
-      .finally(() => setLoading(false));
+      }
+
+      // 2️⃣ offline-token varsa ve IndexedDB'de kullanıcı varsa
+      if (token === 'offline-token') {
+        const offlineUser = await db.getAll('users');
+        if (offlineUser?.[0]) {
+          console.log("✅ Offline token ve kullanıcı bulundu, giriş yapılıyor");
+          setUser(offlineUser[0]);
+          setAuthenticated(true);
+          axios.defaults.headers.common['Authorization'] = `Bearer offline-token`;
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 3️⃣ localStorage'ta token hiç yoksa (yani logout yapılmışsa): asla oturum açma
+      console.warn("❌ Giriş yapılmamış. Oturum açılmayacak.");
+      setUser(null);
+      setAuthenticated(false);
+      setLoading(false);
+    };
+
+    checkLogin();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const response = await axios.post('/login', { email, password });
 
-    const token = response.data.access_token; // ✅ doğru key
-    localStorage.setItem('token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  const login = async (email: string, password: string, navigate?: (to: string) => void) => {
+    try {
+      const response = await axios.post('/login', { email, password });
+      const token = response.data.access_token;
+      localStorage.setItem('token', token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const me = await axios.get('/me');
 
-    const me = await axios.get('/me');
-    setUser(me.data);
+      const db = await initDB();
+      await db.put('auth', token, 'token');
+      await db.put('users', me.data);
+
+      setUser(me.data);
+      setAuthenticated(true);
+      toast.success("Hoşgeldiniz!");
+
+      setTimeout(() => {
+        navigate?.('/');
+      }, 200);
+    } catch (error) {
+      console.warn("🌐 Sunucuya ulaşılamıyor, offline giriş deneniyor...");
+      const db = await initDB();
+      const allUsers = await db.getAll('users');
+      const matchingUser = allUsers.find(u => u.email === email);
+
+      if (matchingUser) {
+        setUser(matchingUser);
+        setAuthenticated(true);
+        localStorage.setItem("token", "offline-token");
+        axios.defaults.headers.common['Authorization'] = `Bearer offline-token`;
+        toast.info("Offline modda oturum açıldı.");
+        setTimeout(() => {
+          navigate?.('/');
+        }, 200);
+      } else {
+        toast.error("Offline giriş başarısız. Daha önce bu kullanıcıyla giriş yapılmamış.");
+        throw new Error("Offline giriş başarısız.");
+      }
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, authenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -46,7 +46,8 @@ const navItems: NavItem[] = [
     icon: <BoxCubeIcon />,
     name: "Ürünler",
     subItems: [
-      { name: "Ürün Yönetimi", path: "/urunler", pro: false },
+      { name: "Ürün Listesi", path: "/urunler", pro: false },
+      { name: "Markalar", path: "/markalar", pro: false },
       { name: "Fiyat Listesi", path: "/fiyat-listesi", pro: false },
       { name: "Fiyat Güncelle", path: "/fiyat-guncelle", pro: false },
     ],

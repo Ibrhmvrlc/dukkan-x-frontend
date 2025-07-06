@@ -18,7 +18,14 @@ interface Urun {
   satis_fiyati: number;
   stok_miktari: number;
   kritik_stok: number;
-  aktif: boolean, // <-- yeni eklendi
+  aktif: boolean;
+  marka: string;
+  tedarikci_id: number;
+  tedarikci?: {
+    id: number;
+    unvan: string;
+    [key: string]: any; // diğerleri lazım olursa
+  };
 }
 
 export default function UrunList() {
@@ -27,6 +34,11 @@ export default function UrunList() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);          // Tekil ürün modalı
   const [showBulkModal, setShowBulkModal] = useState(false);  // Toplu yükleme modalı
+  const [markalar, setMarkalar] = useState<string[]>([]);
+  const [tedarikciler, setTedarikciler] = useState<{ id: number; unvan: string }[]>([]);
+  const [tabType, setTabType] = useState<'all' | 'marka' | 'tedarikci'>('all');
+  const [selectedValue, setSelectedValue] = useState<string | number | null>(null);
+
 
   const [bulkFile, setBulkFile] = useState<File | null>(null); // Toplu dosya state
 
@@ -39,13 +51,27 @@ export default function UrunList() {
     satis_fiyati: "",
     stok_miktari: "",
     kritik_stok: "",
-    aktif: true, // <-- yeni eklendi
+    aktif: true,
   });
 
   const fetchUrunler = async () => {
     try {
       const response = await axios.get('/v1/urunler');
-      setUrunler(response.data.data);
+      const data: Urun[] = response.data.data;
+      setUrunler(data);
+
+      // marka listesi
+      const uniqueMarkalar = Array.from(new Set(data.map((u) => u.marka).filter(Boolean)));
+      setMarkalar(uniqueMarkalar);
+
+      // tedarikçi listesi (unvan + id ile)
+      const uniqueTedarikcilerMap = new Map<number, string>();
+      data.forEach((u) => {
+        if (u.tedarikci && u.tedarikci.id && u.tedarikci.unvan) {
+          uniqueTedarikcilerMap.set(u.tedarikci.id, u.tedarikci.unvan);
+        }
+      });
+      setTedarikciler(Array.from(uniqueTedarikcilerMap.entries()).map(([id, unvan]) => ({ id, unvan })));
     } catch (error) {
       console.error("Veri çekme hatası:", error);
     } finally {
@@ -161,7 +187,17 @@ export default function UrunList() {
     const cesit = item.cesit?.toLocaleLowerCase('tr-TR') || '';
     const arama = search.toLocaleLowerCase('tr-TR');
 
-    return isim.includes(arama) || cesit.includes(arama);
+    const eslesme = isim.includes(arama) || cesit.includes(arama);
+
+    if (tabType === 'marka' && selectedValue) {
+      return eslesme && item.marka === selectedValue;
+    }
+
+    if (tabType === 'tedarikci' && selectedValue !== null) {
+      return eslesme && item.tedarikci_id === selectedValue;
+    }
+
+    return eslesme;
   });
 
   const ortalamaKarOrani = filteredUrunler.length > 0
@@ -227,13 +263,58 @@ export default function UrunList() {
           </div>
         </div>
 
+        <div className="flex gap-2 flex-wrap mb-4">
+          <button
+            onClick={() => {
+              setTabType('all');
+              setSelectedValue(null);
+            }}
+            className={`px-3 py-1 rounded-full border ${tabType === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
+          >
+            Tüm Ürünler
+          </button>
+
+          {markalar.map((marka) => (
+            <button
+              key={marka}
+              onClick={() => {
+                setTabType('marka');
+                setSelectedValue(marka);
+              }}
+              className={`px-3 py-1 rounded-full border ${tabType === 'marka' && selectedValue === marka ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
+            >
+              {marka}
+            </button>
+          ))}
+
+          {tedarikciler.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => {
+                setTabType('tedarikci');
+                setSelectedValue(t.id);
+              }}
+              className={`px-3 py-1 rounded-full border ${tabType === 'tedarikci' && selectedValue === t.id ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
+            >
+              {t.unvan.length > 12 ? t.unvan.slice(0, 12) + '…' : t.unvan}
+            </button>
+          ))}
+        </div>
+
         {/* Ürün Tablosu */}
         <table className="min-w-full table-auto border-collapse text-sm text-gray-800 dark:text-white/90">
-          <thead className='bg-gray-100 dark:bg-white/[0.03]'>
+          <thead className="bg-gray-100 dark:bg-white/[0.03]">
             <tr>
               <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Adı</th>
-              <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Çeşidi</th>
-              <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Birim</th>
+              <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Çeşidi</th>
+
+              {tabType === 'marka' && (
+                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Tedarikçi</th>
+              )}
+              {tabType === 'tedarikci' && (
+                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Marka</th>
+              )}
+
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-red-700 dark:text-red-700 hidden md:table-cell">Tedarik Fiyatı</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-green-700 dark:text-green-300">Satış Fiyatı</th>
               <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Kar Marjı</th>
@@ -249,27 +330,38 @@ export default function UrunList() {
                       to={`/urunler/${urun.id}`} 
                       className="hover:bg-blue-100 text-blue-600 dark:text-blue-400"
                     >
-                    {urun.isim}
+                      {urun.isim}
                     </Link>
+                  </td>
+                  <td className="p-2 text-center">{urun.cesit}</td>
+
+                  {tabType === 'marka' && (
+                    <td className="p-2 text-center hidden md:table-cell">
+                      {urun.tedarikci?.unvan || '—'}
                     </td>
-                  <td className="p-2 text-center hidden md:table-cell">{urun.cesit}</td>
-                  <td className="p-2 text-center">{urun.birim}</td>
+                  )}
+                  {tabType === 'tedarikci' && (
+                    <td className="p-2 text-center hidden md:table-cell">
+                      {urun.marka || '—'}
+                    </td>
+                  )}
+
                   <td className="p-2 text-center text-red-600 dark:text-red-300 hidden md:table-cell">
                     {new Intl.NumberFormat('tr-TR', {
                       minimumFractionDigits: urun.tedarik_fiyati % 1 === 0 ? 0 : 2,
                       maximumFractionDigits: 2,
                     }).format(urun.tedarik_fiyati)} ₺
-                  </td>  
+                  </td>
                   <td className="p-2 text-center text-green-700 dark:text-green-300">
                     {new Intl.NumberFormat('tr-TR', {
                       minimumFractionDigits: urun.satis_fiyati % 1 === 0 ? 0 : 2,
                       maximumFractionDigits: 2,
                     }).format(urun.satis_fiyati)} ₺
-                  </td>                  
+                  </td>
                   <td className="p-2 text-center">
                     %{((urun.satis_fiyati - urun.tedarik_fiyati) / urun.satis_fiyati * 100)
-                    .toFixed(2)
-                    .replace('.', ',')}
+                      .toFixed(2)
+                      .replace('.', ',')}
                   </td>
                   <td className={`p-2 text-center hidden md:table-cell ${
                     urun.kritik_stok != null && Number(urun.stok_miktari) <= Number(urun.kritik_stok)
@@ -282,7 +374,7 @@ export default function UrunList() {
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="p-4 text-center text-gray-500">Kayıt bulunamadı</td>
+                <td colSpan={8} className="p-4 text-center text-gray-500">Kayıt bulunamadı</td>
               </tr>
             )}
           </tbody>
@@ -290,7 +382,7 @@ export default function UrunList() {
             <tr>
               <td></td>
               <td></td>
-              <td className='hidden md:table-cell'></td>
+              <td className="hidden md:table-cell"></td>
               <td className="hidden md:table-cell"></td>
               <td className="p-4 text-right font-semibold">Beklenen Kar:</td>
               <td className="p-4 text-center font-semibold text-green-700 dark:text-green-300">
@@ -300,6 +392,8 @@ export default function UrunList() {
             </tr>
           </tfoot>
         </table>
+
+
       </div>
 
       {/* Modal */}
@@ -419,8 +513,6 @@ export default function UrunList() {
           </form>
         </div>
       </Modal>
-
-
     </div>
   );
 }

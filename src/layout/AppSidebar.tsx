@@ -6,6 +6,7 @@ import {
   BoxCubeIcon,
   CalenderIcon,
   ChevronDownIcon,
+  DollarLineIcon,
   GridIcon,
   GroupIcon,
   HorizontaLDots,
@@ -53,8 +54,18 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    icon: <DollarLineIcon />,
+    name: "Tahsilat Ekle",
+    path: "/tahsilat-ekle",
+  },
+  {
+    name: "Ekstreler",
+    icon: <ListIcon />,
+    subItems: [{ name: "Borçlu Cari Hesaplar", path: "/borclu-hesaplar", pro: false }, { name: "Alacaklı Cari Hesaplar", path: "/alacakli-hesaplar", pro: false }],
+  },
+  {
     icon: <CalenderIcon />,
-    name: "Calendar",
+    name: "Takvim",
     path: "/calendar",
   },
   {

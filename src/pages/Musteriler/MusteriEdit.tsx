@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import SiparisListesi from '../../pages/Siparisler/SiparisListesi';
 
-
 import { Modal } from "../../components/ui/modal";
 
 interface Tur {

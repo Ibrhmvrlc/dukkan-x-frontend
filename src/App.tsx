@@ -32,6 +32,7 @@ import UrunList from "./pages/Urunler/UrunList.tsx";
 import UrunEdit from "./pages/Urunler/UrunEdit.tsx";
 import YeniUrun from "./pages/Urunler/YeniUrun.tsx";
 import SiparisOlustur from "./pages/Siparisler/SiparisOlustur.tsx";
+import TedarikciList from "./pages/Tedarikciler/TedarikciList.tsx";
 
 export default function App() {
   const { loading } = useAuth();
@@ -85,6 +86,9 @@ export default function App() {
           <Route path="/musteriler/yeni" element={<MusteriCreate />} />
           <Route path="/musteriler/:id/duzenle" element={<MusteriEdit />} />
           <Route path="/musteriler" element={<MusteriList />} />
+
+          {/* Tedarikci Modülü */}
+          <Route path="/tedarikciler" element={<TedarikciList />} />
 
           {/* Urun Modülü */}
           <Route path="/urunler" element={<UrunList />} />

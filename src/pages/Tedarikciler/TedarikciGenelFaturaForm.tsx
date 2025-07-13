@@ -7,6 +7,7 @@ import EmailInput from '../../components/tedarikciler/EmailInput';
 import AdresTextarea from '../../components/tedarikciler/AdresTextarea';
 import VergiNoInput from '../../components/tedarikciler/VergiNoInput';
 import VergiDairesiInput from '../../components/tedarikciler/VergiDairesiInput';
+import YetkiliAdSoyadInput from '../../components/tedarikciler/YetkiliAdSoyadInput';
 
 interface Tedarikci {
   id?: number;
@@ -16,6 +17,7 @@ interface Tedarikci {
   adres?: string;
   vergi_no?: string;
   vergi_dairesi?: string;
+  yetkili_ad?: string;
 }
 
 interface TedarikciGenelFaturaFormProps {
@@ -41,7 +43,7 @@ export default function TedarikciGenelFaturaForm({
     email: '',
     adres: '',
     vergi_no: '',
-    vergi_dairesi: '',
+    vergi_dairesi: ''
   });
 
   useEffect(() => {
@@ -87,28 +89,32 @@ export default function TedarikciGenelFaturaForm({
   return (
     <form onSubmit={controlled ? undefined : handleSubmit}>
       <div className="space-y-1">
-        <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">
-          Tedarikçi Bilgileri
-        </h4>
+        <div className="gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
+              Tedarikçi Bilgileri
+            </h4>
 
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <UnvanInput value={finalForm.unvan} onChange={controlled ? onChange! : handleInternalChange} />
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <UnvanInput value={finalForm.unvan} onChange={controlled ? onChange! : handleInternalChange} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <VergiDairesiInput value={finalForm.vergi_dairesi || ''} onChange={controlled ? onChange! : handleInternalChange} />
+              <VergiNoInput value={finalForm.vergi_no || ''} onChange={controlled ? onChange! : handleInternalChange} />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <AdresTextarea value={finalForm.adres || ''} onChange={controlled ? onChange! : handleInternalChange} />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <YetkiliAdSoyadInput value={finalForm.yetkili_ad || ''} onChange={controlled ? onChange! : handleInternalChange} />
+              <TelefonInput value={finalForm.telefon || ''} onChange={controlled ? onTelefonChange! : handleInternalTelefonChange} />
+              <EmailInput value={finalForm.email || ''} onChange={controlled ? onChange! : handleInternalChange} />
+            </div>
+          </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <VergiDairesiInput value={finalForm.vergi_dairesi || ''} onChange={controlled ? onChange! : handleInternalChange} />
-          <VergiNoInput value={finalForm.vergi_no || ''} onChange={controlled ? onChange! : handleInternalChange} />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4">
-          <AdresTextarea value={finalForm.adres || ''} onChange={controlled ? onChange! : handleInternalChange} />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <TelefonInput value={finalForm.telefon || ''} onChange={controlled ? onTelefonChange! : handleInternalTelefonChange} />
-          <EmailInput value={finalForm.email || ''} onChange={controlled ? onChange! : handleInternalChange} />
-        </div>
-
         {!controlled && (
           <div className="flex justify-end mt-4">
             <Button size="md" variant="primary">
@@ -116,6 +122,7 @@ export default function TedarikciGenelFaturaForm({
             </Button>
           </div>
         )}
+        
       </div>
     </form>
   );

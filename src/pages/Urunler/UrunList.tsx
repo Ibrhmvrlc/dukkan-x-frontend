@@ -271,7 +271,7 @@ export default function UrunList() {
             }}
             className={`px-3 py-1 rounded-full border ${tabType === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
           >
-            Tüm Ürünler
+            TÜM ÜRÜNLER
           </button>
 
           {markalar.map((marka) => (
@@ -485,7 +485,7 @@ export default function UrunList() {
           <form onSubmit={handleBulkUpload} className="flex flex-col gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-2">
-                Excel veya CSV Dosyası seçilmelidir. Ayrıca Dosya içeriği sırasıyla "kod, isim, cesit, birim, tedarik_fiyati, satis_fiyati, stok_miktari, kritik_stok, aktif" sütunlarından oluşmalıdır.
+                Excel veya CSV Dosyası seçilmelidir. Ayrıca Dosya içeriği sırasıyla "kod, isim, cesit, birim, tedarik_fiyati, satis_fiyati, stok_miktari, kritik_stok, aktif, marka, tedarikci" sütunlarından oluşmalıdır.
               </label>
               <input
                 type="file"

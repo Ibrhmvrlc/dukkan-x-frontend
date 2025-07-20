@@ -3,6 +3,7 @@ import axios from '../../api/axios';
 import { Link } from 'react-router-dom';
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
 import Button from "../../components/ui/button/Button";
+import { Mail, MessageCircle } from "lucide-react";
 
 interface Tedarikci {
   id: number;
@@ -78,49 +79,56 @@ export default function TedarikcilerList() {
             <thead className="bg-gray-100 dark:bg-white/[0.03]">
               <tr>
                 <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10">Unvan</th>
+                {/* <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10 md:table-cell">Bakiye</th> */}
                 <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10 hidden md:table-cell">Telefon</th>
-                <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10 hidden 2xl:table-cell">Email</th>
-                <th className="px-4 py-3 text-center font-medium border-b dark:border-white/10">Sipariş Ver</th>
+                <th className="px-4 py-3 text-left font-medium border-b dark:border-white/10 hidden md:table-cell">Email</th>
+                 {/*<th className="px-4 py-3 text-center font-medium border-b dark:border-white/10">Sipariş Ver</th> */}
               </tr>
             </thead>
             <tbody>
-              {tedarikciler.map((tedarikci) => (
-                <tr key={tedarikci.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border dark:border-white/10">
-                  <td className="px-4 py-3 border-b dark:border-white/10">
-                   <Link 
-                      to={`/tedarikciler/${tedarikci.id}/duzenle`} 
-                      className="hover:bg-blue-100 text-blue-600 dark:text-blue-400"
-                    >
-                      {tedarikci.unvan}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 border-b dark:border-white/10 hidden md:table-cell">
-                    <a href={`tel:+${tedarikci.telefon}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                      {tedarikci.telefon ? formatPhoneNumberIntl(tedarikci.telefon) : '-'}
-                    </a>
-                  </td>
-                  <td className="px-4 py-3 border-b dark:border-white/10 hidden 2xl:table-cell">{tedarikci.email}</td>
-                  <td className="px-4 py-3 border-b dark:border-white/10 align-middle text-center">
-                    <Link to={`/siparis/ver/${tedarikci.id}`}>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className='text-xs font-medium'
+              {tedarikciler
+                .filter((tedarikci) => tedarikci.id !== 1) // ID'si 1 olanı hariç tut
+                .map((tedarikci) => (
+                  <tr key={tedarikci.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border dark:border-white/10">
+                    <td className="px-4 py-3 border-b dark:border-white/10">
+                      <Link 
+                        to={`/tedarikciler/${tedarikci.id}/duzenle`} 
+                        className="hover:bg-blue-100 text-blue-600 dark:text-blue-400"
                       >
-                        WhatsApp
-                      </Button>
-                    </Link>
-                    <Link to={`/siparis/ver/${tedarikci.id}`}>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className='text-xs font-medium'
-                      >
-                        E-Posta
-                      </Button>
-                    </Link>
-                  </td>
-                </tr>
+                        {tedarikci.unvan}
+                      </Link>
+                    </td>
+                    {/* <td className="px-4 py-3 border-b dark:border-white/10 md:table-cell">
+                      100.000 (A)
+                    </td>
+                    */}
+                    <td className="px-4 py-3 border-b dark:border-white/10 hidden md:table-cell">
+                      <a href={`tel:+${tedarikci.telefon}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                        {tedarikci.telefon ? formatPhoneNumberIntl(tedarikci.telefon) : '-'}
+                      </a>
+                    </td>
+                    <td className="px-4 py-3 border-b dark:border-white/10 hidden md:table-cell">{tedarikci.email}</td>
+                    {/* <td className="px-4 py-3 border-b dark:border-white/10 align-middle text-center">
+                      <Link to={`/siparis/ver/${tedarikci.id}`}>
+                        <button
+                          className="m-1 p-2 rounded-md border border-gray-300 dark:border-gray-700 text-gray-400 hover:text-green-500 hover:border-green-500 transition-colors"
+                          title="WhatsApp ile Sipariş Ver"
+                          disabled
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </button>
+                      </Link>
+                      <Link to={`/siparis/ver/${tedarikci.id}`}>
+                        <button
+                          className="p-2 rounded-md border border-gray-300 dark:border-gray-700 text-gray-400 hover:text-blue-500 hover:border-blue-500 transition-colors"
+                          title="E-Posta ile Sipariş Ver"
+                          disabled
+                        >
+                          <Mail className="w-4 h-4" />
+                        </button>
+                      </Link>
+                    </td> */}
+                  </tr>
               ))}
             </tbody>
           </table>

@@ -122,7 +122,6 @@ export default function TedarikciGenelFaturaForm({
             </Button>
           </div>
         )}
-        
       </div>
     </form>
   );

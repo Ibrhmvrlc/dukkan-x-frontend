@@ -200,9 +200,6 @@ export default function MusteriEdit() {
         </div>
       </div>
 
-
-
-
       <Tabs defaultValue="ozet" className="w-full">
         <div className="">
           <TabsList className="grid grid-cols-4 text-center">

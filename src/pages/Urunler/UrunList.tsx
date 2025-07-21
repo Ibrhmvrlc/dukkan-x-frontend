@@ -39,7 +39,6 @@ export default function UrunList() {
   const [tabType, setTabType] = useState<'all' | 'marka' | 'tedarikci'>('all');
   const [selectedValue, setSelectedValue] = useState<string | number | null>(null);
 
-
   const [bulkFile, setBulkFile] = useState<File | null>(null); // Toplu dosya state
 
   const [form, setForm] = useState({
@@ -51,8 +50,39 @@ export default function UrunList() {
     satis_fiyati: "",
     stok_miktari: "",
     kritik_stok: "",
+    marka: "",
     aktif: true,
   });
+
+  const generateUniqueKod = (marka: string) => {
+    const clean = (str: string) => {
+      const turkishMap: Record<string, string> = {
+        ç: "c", Ç: "C",
+        ğ: "g", Ğ: "G",
+        ı: "i", İ: "I",
+        ö: "o", Ö: "O",
+        ş: "s", Ş: "S",
+        ü: "u", Ü: "U"
+      };
+
+      const replaced = str
+        .split("")
+        .map(c => turkishMap[c] || c)
+        .join("");
+
+      return replaced
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .substring(0, 3);
+    };
+
+    const markaKodu = clean(marka || "XXX");
+    const timestamp = Date.now().toString().slice(-5);
+    const random = Math.floor(1000 + Math.random() * 9000);
+
+    return `${markaKodu}-${timestamp}-${random}`;
+  };
+
 
   const fetchUrunler = async () => {
     try {
@@ -64,14 +94,6 @@ export default function UrunList() {
       const uniqueMarkalar = Array.from(new Set(data.map((u) => u.marka).filter(Boolean)));
       setMarkalar(uniqueMarkalar);
 
-      // tedarikçi listesi (unvan + id ile)
-      const uniqueTedarikcilerMap = new Map<number, string>();
-      data.forEach((u) => {
-        if (u.tedarikci && u.tedarikci.id && u.tedarikci.unvan) {
-          uniqueTedarikcilerMap.set(u.tedarikci.id, u.tedarikci.unvan);
-        }
-      });
-      setTedarikciler(Array.from(uniqueTedarikcilerMap.entries()).map(([id, unvan]) => ({ id, unvan })));
     } catch (error) {
       console.error("Veri çekme hatası:", error);
     } finally {
@@ -79,8 +101,19 @@ export default function UrunList() {
     }
   };
 
+  const fetchTedarikciler = async () => {
+    try {
+      const response = await axios.get('/v1/tedarikciler');
+      const allTedarikciler = response.data.data;
+      setTedarikciler(allTedarikciler); // response verisi: { id, unvan }[]
+    } catch (error) {
+      console.error("Tedarikçi verisi alınamadı:", error);
+    }
+  };
+
   useEffect(() => {
     fetchUrunler();
+    fetchTedarikciler(); // 💡 Tüm tedarikçileri çek
   }, []);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -90,7 +123,13 @@ export default function UrunList() {
   const handleFormChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     const val = type === "checkbox" ? checked : value;
-    setForm(prev => ({ ...prev, [name]: val }));
+
+    if (name === "marka") {
+      const yeniKod = generateUniqueKod(value);
+      setForm((prev) => ({ ...prev, [name]: value, kod: yeniKod }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: val }));
+    }
   };
 
 
@@ -115,6 +154,7 @@ export default function UrunList() {
         satis_fiyati: "",
         stok_miktari: "",
         kritik_stok: "",
+        marka: "",
         aktif: true, // <-- yeni eklendi
       });
     } catch (error: any) {
@@ -154,6 +194,11 @@ export default function UrunList() {
         position: "top-right",
       });
     }
+  };
+
+  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleExport = async () => {
@@ -419,9 +464,41 @@ export default function UrunList() {
               />
             </div>
 
+            <div>
+              <label htmlFor="tedarikci_id" className="block text-sm font-medium text-gray-700 dark:text-white/80">Tedarikçi</label>
+              <select
+                name="tedarikci_id"
+                id="tedarikci_id"
+                value={(form as any).tedarikci_id || ""}
+                onChange={handleSelectChange}
+                required
+                className="w-full p-2 border border-gray-300 rounded dark:border-white/10 dark:bg-white/[0.05] dark:text-white/90"
+              >
+                <option value="" className="bg-white dark:bg-gray-700 text-black dark:text-white">Tedarikçi Seçiniz</option>
+                {tedarikciler.map((tedarikci) => (
+                  <option key={tedarikci.id} value={tedarikci.id} className="bg-white dark:bg-gray-700 text-black dark:text-white">
+                    {tedarikci.unvan}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="tedarikci_id" className="block text-sm font-medium text-gray-700 dark:text-white/80">Ürün Kodu</label>
+              <input
+                type="text"
+                name="kod"
+                id="kod"
+                value={form.kod}
+                readOnly
+                disabled
+                className="w-full p-2 border border-gray-300 rounded dark:border-white/10 dark:bg-white/[0.05] dark:text-white/90"
+              />
+            </div>
+
             {/* Diğer inputlar - 2'li kolon yapısı */}
             {[
-              { name: "kod", label: "Ürün Kodu" },
+              { name: "marka", label: "Marka" },
               { name: "cesit", label: "Çeşit" },
               { name: "birim", label: "Birim" },
               { name: "tedarik_fiyati", label: "Tedarik Fiyatı" },

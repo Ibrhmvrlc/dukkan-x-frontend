@@ -72,7 +72,7 @@ export default function TedarikcilerList() {
       <div className="">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-bold dark:text-white/90">Tedarikçiler</h1>
-          <Link to="/tedarikciler/yeni" className="flex items-center justify-center p-3 font-medium text-white rounded-lg bg-brand-500 text-theme-sm hover:bg-brand-600">+   Tedarikçi Ekle</Link>
+          <Link to="/tedarikciler/yeni" className="flex items-center justify-center p-3 font-medium text-white rounded-lg bg-brand-500 text-theme-sm hover:bg-brand-600">+ Tedarikçi Ekle</Link>
         </div>
        <div className="overflow-x-auto p-2 border border-gray-200 rounded-2xl dark:border-white/10 shadow-sm">
           <table className="min-w-full table-auto border-collapse text-sm text-gray-800 dark:text-white/90">

@@ -91,10 +91,7 @@ export default function TedarikciGenelFaturaForm({
       <div className="space-y-1">
         <div className="gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-              Tedarikçi Bilgileri
-            </h4>
-
+            
             <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
               <UnvanInput value={finalForm.unvan} onChange={controlled ? onChange! : handleInternalChange} />
             </div>

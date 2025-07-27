@@ -26,6 +26,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Unauthorized from './pages/OtherPage/Unauthorized';
 import { useAuth } from './context/AuthContext';
 import MusteriCreate from './pages/Musteriler/MusteriCreate.tsx';
+import TedarikciCreate from './pages/Tedarikciler/TedarikciCreate.tsx';
 import MusteriEdit from './pages/Musteriler/MusteriEdit.tsx';
 import MusteriList from './pages/Musteriler/MusteriList.tsx';
 import UrunList from "./pages/Urunler/UrunList.tsx";
@@ -89,7 +90,7 @@ export default function App() {
           <Route path="/musteriler" element={<MusteriList />} />
 
           {/* Tedarikci Modülü */}
-          { /* <Route path="/tedarikciler/yeni" element={<TedarikciCreate />} /> */ }
+          <Route path="/tedarikciler/yeni" element={<TedarikciCreate />} />
           <Route path="/tedarikciler" element={<TedarikciList />} />
           <Route path="/tedarikciler/:id/duzenle" element={<TedarikciEdit />} />
 

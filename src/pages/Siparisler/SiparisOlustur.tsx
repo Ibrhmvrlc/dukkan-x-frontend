@@ -147,8 +147,8 @@ export default function SiparisOlustur() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4">
       <div className="lg:col-span-2 space-y-4 dark:text-gray-100">
         <div className="sticky top-9 bg-white dark:bg-gray-900 z-10 rounded shadow">
-          <h1 className="text-lg font-bold">Sipariş Oluştur</h1>
-          <small>{musteri.unvan}</small>
+          <h1 className="text-lg font-bold pt-2 pl-2">Sipariş Oluştur</h1>
+          <small className='pt-2 pl-2'>{musteri.unvan}</small>
           <input
             type="text"
             placeholder="Ürün ara..."

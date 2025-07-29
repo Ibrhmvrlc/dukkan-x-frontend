@@ -426,7 +426,6 @@ export default function UrunList() {
           <tfoot>
             <tr>
               <td></td>
-              <td></td>
               <td className="hidden md:table-cell"></td>
               <td className="hidden md:table-cell"></td>
               <td className="p-4 text-right font-semibold">Beklenen Kar:</td>

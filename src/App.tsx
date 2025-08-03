@@ -32,6 +32,7 @@ import MusteriList from './pages/Musteriler/MusteriList.tsx';
 import UrunList from "./pages/Urunler/UrunList.tsx";
 import UrunEdit from "./pages/Urunler/UrunEdit.tsx";
 import YeniUrun from "./pages/Urunler/YeniUrun.tsx";
+import UrunFiyatGuncelleme from "./pages/Urunler/UrunFiyatGuncelleme.tsx";
 import SiparisOlustur from "./pages/Siparisler/SiparisOlustur.tsx";
 import TedarikciList from "./pages/Tedarikciler/TedarikciList.tsx";
 import TedarikciEdit from "./pages/Tedarikciler/TedarikciEdit.tsx";
@@ -98,6 +99,7 @@ export default function App() {
           <Route path="/urunler" element={<UrunList />} />
           <Route path="/urunler/:id" element={<UrunEdit />} />
           <Route path="/urunler/yeni" element={<YeniUrun />} />
+          <Route path="/fiyat-guncelle" element={<UrunFiyatGuncelleme />} />
 
           <Route path="/siparisler/olustur/:musteriId" element={<SiparisOlustur />} />
 

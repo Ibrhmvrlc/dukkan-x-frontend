@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Modal } from "../../components/ui/modal";
 import { toast } from 'react-toastify';
 import Button from "../../components/ui/button/Button";
-import { PlusIcon } from "../../icons";
+import { BoxCubeIcon, PlusIcon } from "../../icons";
 import { ArrowUpIcon } from "../../icons";
 import { ArrowDownIcon } from "../../icons";
 
@@ -34,12 +34,72 @@ export default function UrunList() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);          // Tekil ürün modalı
   const [showBulkModal, setShowBulkModal] = useState(false);  // Toplu yükleme modalı
+  const [showStokModal, setShowStokModal] = useState(false);  // Stok ekeleme modalı
   const [markalar, setMarkalar] = useState<string[]>([]);
   const [tedarikciler, setTedarikciler] = useState<{ id: number; unvan: string }[]>([]);
   const [tabType, setTabType] = useState<'all' | 'marka' | 'tedarikci'>('all');
   const [selectedValue, setSelectedValue] = useState<string | number | null>(null);
+  const [urunQuery, setUrunQuery] = useState("");
+  const [stokUrunAdaylari, setStokUrunAdaylari] = useState<Urun[]>([]);
+
 
   const [bulkFile, setBulkFile] = useState<File | null>(null); // Toplu dosya state
+
+  const [stokForm, setStokForm] = useState({
+    urun_id: "",
+    miktar: ""
+  });
+
+  const handleUrunQueryChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUrunQuery(value);
+
+    const results = urunler.filter((urun) =>
+      urun.isim.toLocaleLowerCase('tr-TR').includes(value.toLocaleLowerCase())
+    );
+    setStokUrunAdaylari(results);
+  };
+
+
+  const handleStokFormChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "miktar") {
+      // Noktaları temizle (örn. 100.000 → 100000)
+      const rawValue = value.replace(/\./g, "").replace(/[^0-9]/g, "");
+
+      setStokForm((prev) => ({
+        ...prev,
+        miktar: rawValue
+      }));
+    } else {
+      setStokForm((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+
+  const handleStokSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await axios.patch(`/v1/urunler/${stokForm.urun_id}/stok-ekle`, {
+        miktar: parseInt(stokForm.miktar)
+      });
+
+      toast.success("Stok başarıyla eklendi");
+      setShowStokModal(false);
+      fetchUrunler(); // listeyi güncelle
+
+      // 🔧 Tüm ilgili state'leri sıfırla:
+      setStokForm({ urun_id: "", miktar: "" });
+      setUrunQuery("");                     // input içindeki yazıyı temizle
+      setStokUrunAdaylari([]);              // öneri listesini kapat
+    } catch (err: any) {
+      console.error("Stok eklenemedi:", err.response?.data || err.message);
+      toast.error("Stok eklenirken hata oluştu");
+    }
+  };
+
 
   const [form, setForm] = useState({
     kod: "",
@@ -275,13 +335,22 @@ export default function UrunList() {
 
           <div className="flex flex-nowrap gap-2 overflow-x-auto">
             <Button
+              onClick={() => setShowStokModal(true)}
+              size="sm"
+              variant="outline"
+              startIcon={<BoxCubeIcon />}
+              className="whitespace-nowrap shrink-0"
+            >
+              Stok Ekle
+            </Button>
+            <Button
               onClick={() => setShowModal(true)}
               size="sm"
               variant="outline"
               startIcon={<PlusIcon />}
               className="whitespace-nowrap shrink-0"
             >
-              Ürün Ekle
+              Ürün Yükle
             </Button>
             <Button
               onClick={() => setShowBulkModal(true)}
@@ -413,7 +482,7 @@ export default function UrunList() {
                       ? 'text-red-500'
                       : ''
                   }`}>
-                    {Math.floor(Number(urun.stok_miktari))}
+                    {new Intl.NumberFormat('tr-TR').format(Math.floor(Number(urun.stok_miktari)))}
                   </td>
                 </tr>
               ))
@@ -436,8 +505,6 @@ export default function UrunList() {
             </tr>
           </tfoot>
         </table>
-
-
       </div>
 
       {/* Modal */}
@@ -545,6 +612,70 @@ export default function UrunList() {
               </button>
               <button type="submit" className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
                 Kaydet
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showStokModal} onClose={() => setShowStokModal(false)} className="max-w-[700px] m-4">
+        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold dark:text-white/90">Stok Ekle</h2>
+            <button onClick={() => setShowStokModal(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-white">×</button>
+          </div>
+
+          <form onSubmit={handleStokSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2 relative">
+              <label htmlFor="urun_ara" className="block text-sm font-medium text-gray-700 dark:text-white/80">Ürün Ara ve Seç</label>
+              <input
+                type="text"
+                name="urun_ara"
+                id="urun_ara"
+                value={urunQuery}
+                onChange={handleUrunQueryChange}
+                placeholder="Ürün ismi girin..."
+                className="w-full p-2 border border-gray-300 rounded dark:border-white/10 dark:bg-white/[0.05] dark:text-white/90"
+              />
+
+              {urunQuery && stokUrunAdaylari.length > 0 && (
+                <ul className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 dark:text-white/90 rounded shadow-lg">
+                  {stokUrunAdaylari.map((urun) => (
+                    <li
+                      key={urun.id}
+                      className="p-2 hover:bg-blue-100 dark:hover:bg-white/10 cursor-pointer"
+                      onClick={() => {
+                        setStokForm((prev) => ({ ...prev, urun_id: urun.id.toString() }));
+                        setUrunQuery(urun.isim); // input'ta ismi göster
+                        setStokUrunAdaylari([]); // listeyi gizle
+                      }}
+                    >
+                      {urun.isim}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="md:col-span-2">
+              <label htmlFor="miktar" className="block text-sm font-medium text-gray-700 dark:text-white/80">Eklenecek Miktar</label>
+              <input
+                type="text"
+                name="miktar"
+                id="miktar"
+                value={Number(stokForm.miktar || "0").toLocaleString('tr-TR')}
+                onChange={handleStokFormChange}
+                required
+                className="w-full p-2 border border-gray-300 rounded dark:border-white/10 dark:bg-white/[0.05] dark:text-white/90"
+              />
+            </div>
+
+            <div className="md:col-span-2 flex justify-end gap-2 mt-4">
+              <button type="button" onClick={() => setShowStokModal(false)} className="px-4 py-2 text-sm bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-white rounded">
+                Vazgeç
+              </button>
+              <button type="submit" className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                Stok Ekle
               </button>
             </div>
           </form>

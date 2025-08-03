@@ -48,8 +48,6 @@ const navItems: NavItem[] = [
     name: "Ürünler",
     subItems: [
       { name: "Ürün Yönetimi", path: "/urunler", pro: false },
-      { name: "Stok Ekle", path: "/stok-yonetimi", pro: false },
-      { name: "Fiyat Listesi", path: "/fiyat-listesi", pro: false },
       { name: "Fiyat Güncelle", path: "/fiyat-guncelle", pro: false },
     ],
   },

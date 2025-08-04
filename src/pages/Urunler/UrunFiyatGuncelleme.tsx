@@ -49,7 +49,7 @@ export default function FiyatGuncellemeSayfasi() {
   });
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-full overflow-x-auto">
+    <div className="space-y-6 max-w-full overflow-x-auto">
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Fiyat Güncelleme Modülü</h1>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -71,7 +71,7 @@ export default function FiyatGuncellemeSayfasi() {
         <TabsContent value="toplu" className="overflow-x-auto p-1 md:p-2 border border-gray-200 rounded-2xl dark:border-white/10 shadow-sm dark:text-white/90 ">
           <div className={classNames("space-y-4 p-4", { "opacity-30 pointer-events-none": activeTab !== "toplu" })}>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Yüzde oranı girin (%):</label>
+              <label className="text-sm font-medium">Yüzde oranı girin (%): </label>
               <input
                 type="number"
                 value={oran}
@@ -123,7 +123,7 @@ export default function FiyatGuncellemeSayfasi() {
             </div>
 
             <div className="space-y-2 overflow-x-auto">
-              <h2 className="text-md font-semibold border-b pb-1">{aktifMarkaSekmesi}</h2>
+              <h2 className="text-md font-semibold pb-1">{aktifMarkaSekmesi}</h2>
               <div className="w-full overflow-auto">
                 <table className="min-w-full table-auto text-sm">
                   <thead>
@@ -137,7 +137,7 @@ export default function FiyatGuncellemeSayfasi() {
                   </thead>
                   <tbody>
                     {filtrelenmisUrunler.map((u) => (
-                      <tr key={u.id} className="border-t">
+                      <tr key={u.id} className="border-t border-gray-200 rounded-2xl dark:border-white/10">
                         <td className="px-3 py-2 whitespace-nowrap">{u.isim}</td>
                         <td className="px-3 py-2 text-center whitespace-nowrap">₺{u.tedarik_fiyati}</td>
                         <td className="px-3 py-2 text-center whitespace-nowrap">₺{u.satis_fiyati}</td>
@@ -151,7 +151,7 @@ export default function FiyatGuncellemeSayfasi() {
                                 [u.id]: Number(e.target.value),
                               })
                             }
-                            className="border rounded px-2 py-1 text-sm w-24 text-center bg-white dark:bg-gray-900 text-black dark:text-white border-gray-300 dark:border-white/10"
+                            className="border rounded px-2 py-1 text-sm w-24 text-center bg-white dark:bg-white/[0.05] text-black dark:text-white border-gray-300 dark:border-white/10"
                           />
                         </td>
                         <td className="px-3 py-2">

@@ -42,6 +42,13 @@ export default function UrunList() {
   const [urunQuery, setUrunQuery] = useState("");
   const [stokUrunAdaylari, setStokUrunAdaylari] = useState<Urun[]>([]);
 
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [sensitiveVisible, setSensitiveVisible] = useState(false);
+
+  const CAN_SEE_ROLES = ["admin","yönetici","yonetici","müdür","mudur","owner"];
+  const canSeeSensitiveCols = userRoles.some(r => CAN_SEE_ROLES.includes(r.toLowerCase()));
+
+
 
   const [bulkFile, setBulkFile] = useState<File | null>(null); // Toplu dosya state
 
@@ -172,9 +179,32 @@ export default function UrunList() {
   };
 
   useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const res = await axios.get('/me'); // jwt.auth altındaki /me
+        setUserRoles(res.data.roles || []);
+      } catch (e) {
+        console.error("Kullanıcı/rol alınamadı:", e);
+        setUserRoles([]);
+      }
+    };
+
+    fetchMe();
     fetchUrunler();
-    fetchTedarikciler(); // 💡 Tüm tedarikçileri çek
+    fetchTedarikciler();
   }, []);
+
+  const formatMoney = (n: number) =>
+    new Intl.NumberFormat('tr-TR', {
+      minimumFractionDigits: n % 1 === 0 ? 0 : 2,
+      maximumFractionDigits: 2
+    }).format(n) + " ₺";
+
+  const mask = (s: string) => (sensitiveVisible ? s : "***");
+
+  const profitPercent = (urun: Urun) =>
+    ((urun.satis_fiyati - urun.tedarik_fiyati) / urun.satis_fiyati) * 100;
+
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -387,7 +417,7 @@ export default function UrunList() {
                 setTabType('all');
                 setSelectedValue(null);
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-md ${tabType === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
+              className={`px-4 py-2 text-sm font-medium rounded-md ${tabType === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
             >
               TÜM ÜRÜNLER
             </button>
@@ -399,7 +429,7 @@ export default function UrunList() {
                   setTabType('marka');
                   setSelectedValue(marka);
                 }}
-                className={`px-4 py-2 text-sm font-medium rounded-md ${tabType === 'marka' && selectedValue === marka ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
+                className={`px-4 py-2 text-sm font-medium rounded-md ${tabType === 'marka' && selectedValue === marka ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
               >
                 {marka}
               </button>
@@ -412,7 +442,7 @@ export default function UrunList() {
                   setTabType('tedarikci');
                   setSelectedValue(t.id);
                 }}
-                className={`px-4 py-2 text-sm font-medium rounded-md ${tabType === 'tedarikci' && selectedValue === t.id ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
+                className={`px-4 py-2 text-sm font-medium rounded-md ${tabType === 'tedarikci' && selectedValue === t.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-white/80'} text-sm`}
               >
                 {t.unvan.length > 12 ? t.unvan.slice(0, 12) + '…' : t.unvan}
               </button>
@@ -423,8 +453,9 @@ export default function UrunList() {
           <table className="min-w-full table-auto border-collapse text-sm text-gray-800 dark:text-white/90">
             <thead className="bg-gray-100 dark:bg-white/[0.03]">
               <tr>
+                <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Stok Kodu</th>
                 <th className="px-4 py-3 text-left font-medium border-b border-gray-300/20 dark:border-white/10">Adı</th>
-                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Çeşidi</th>
+                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Çeşidi</th>
 
                 {tabType === 'marka' && (
                   <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Tedarikçi</th>
@@ -432,10 +463,52 @@ export default function UrunList() {
                 {tabType === 'tedarikci' && (
                   <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Marka</th>
                 )}
-
-                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-red-700 dark:text-red-700 hidden md:table-cell">Tedarik Fiyatı</th>
-                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-green-700 dark:text-green-300">Satış Fiyatı</th>
-                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">Kar Marjı</th>
+                {canSeeSensitiveCols && (
+                  <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-red-700 dark:text-red-700 hidden md:table-cell">
+                    <div className="inline-flex items-center justify-center gap-2">
+                      <span>Tedarik Fiyatı</span>
+                      <button
+                        type="button"
+                        onClick={() => setSensitiveVisible(v => !v)}
+                        className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10"
+                        title={sensitiveVisible ? "Gizle" : "Göster"}
+                      >
+                        {sensitiveVisible ? "🙈" : "👁️"}
+                      </button>
+                    </div>
+                  </th>
+                )}
+                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 text-green-700 dark:text-green-300 hidden md:table-cell">Satış Fiyatı</th>
+                {canSeeSensitiveCols && (
+                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 table-cell md:hidden">
+                  <div className="inline-flex items-center justify-center gap-2">
+                      <span>Fiyat</span>
+                      <button
+                        type="button"
+                        onClick={() => setSensitiveVisible(v => !v)}
+                        className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10"
+                        title={sensitiveVisible ? "Gizle" : "Göster"}
+                      >
+                        {sensitiveVisible ? "🙈" : "👁️"}
+                      </button>
+                    </div>
+                </th>
+                )}
+                {canSeeSensitiveCols && (
+                <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10">
+                  <div className="inline-flex items-center justify-center gap-2">
+                    <span>Kar Marjı</span>
+                    <button
+                      type="button"
+                      onClick={() => setSensitiveVisible(v => !v)}
+                      className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10"
+                      title={sensitiveVisible ? "Gizle" : "Göster"}
+                    >
+                      {sensitiveVisible ? "🙈" : "👁️"}
+                    </button>
+                  </div>
+                </th>
+                )}
                 <th className="px-4 py-3 text-center font-medium border-b border-gray-300/20 dark:border-white/10 hidden md:table-cell">Stok</th>
               </tr>
             </thead>
@@ -443,6 +516,7 @@ export default function UrunList() {
               {filteredUrunler.length > 0 ? (
                 filteredUrunler.map((urun) => (
                   <tr key={urun.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border dark:border-white/10">
+                    <td className="p-2">{urun.kod}</td>
                     <td className="p-2">
                       <Link 
                         to={`/urunler/${urun.id}`} 
@@ -451,7 +525,7 @@ export default function UrunList() {
                         {urun.isim}
                       </Link>
                     </td>
-                    <td className="p-2 text-center">{urun.cesit}</td>
+                    <td className="p-2 text-center hidden md:table-cell">{urun.cesit}</td>
 
                     {tabType === 'marka' && (
                       <td className="p-2 text-center hidden md:table-cell">
@@ -464,23 +538,26 @@ export default function UrunList() {
                       </td>
                     )}
 
-                    <td className="p-2 text-center text-red-600 dark:text-red-300 hidden md:table-cell">
-                      {new Intl.NumberFormat('tr-TR', {
-                        minimumFractionDigits: urun.tedarik_fiyati % 1 === 0 ? 0 : 2,
-                        maximumFractionDigits: 2,
-                      }).format(urun.tedarik_fiyati)} ₺
+                    {canSeeSensitiveCols && (
+                      <td className="p-2 text-center text-red-600 dark:text-red-300 hidden md:table-cell">
+                        {mask(formatMoney(urun.tedarik_fiyati))}
+                      </td>
+                    )}
+                   <td className="p-2 text-center text-green-700 dark:text-green-300">
+                      {canSeeSensitiveCols && (
+                        <div className='md:hidden text-red-600 dark:text-red-300'>
+                          {mask(formatMoney(urun.tedarik_fiyati))}
+                        </div>
+                      )}
+                      <div>{formatMoney(urun.satis_fiyati)}</div>
                     </td>
-                    <td className="p-2 text-center text-green-700 dark:text-green-300">
-                      {new Intl.NumberFormat('tr-TR', {
-                        minimumFractionDigits: urun.satis_fiyati % 1 === 0 ? 0 : 2,
-                        maximumFractionDigits: 2,
-                      }).format(urun.satis_fiyati)} ₺
-                    </td>
-                    <td className="p-2 text-center">
-                      %{((urun.satis_fiyati - urun.tedarik_fiyati) / urun.satis_fiyati * 100)
-                        .toFixed(2)
-                        .replace('.', ',')}
-                    </td>
+
+                    {canSeeSensitiveCols && (
+                      <td className="p-2 text-center">
+                        {mask(`%${profitPercent(urun).toFixed(2).replace('.', ',')}`)}
+                      </td>
+                    )}
+
                     <td className={`p-2 text-center hidden md:table-cell ${
                       urun.kritik_stok != null && Number(urun.stok_miktari) <= Number(urun.kritik_stok)
                         ? 'text-red-500'
@@ -501,10 +578,13 @@ export default function UrunList() {
                 <td></td>
                 <td className="hidden md:table-cell"></td>
                 <td className="hidden md:table-cell"></td>
+                <td className=""></td>
                 <td className="p-4 text-right font-semibold">Beklenen Kar:</td>
-                <td className="p-4 text-center font-semibold text-green-700 dark:text-green-300">
-                  %{ortalamaKarOrani.toFixed(2).replace('.', ',')}
-                </td>
+                {canSeeSensitiveCols && 
+                  <td className="p-4 text-center font-semibold text-green-700 dark:text-green-300">
+                    {mask(`%${ortalamaKarOrani.toFixed(2).replace('.', ',')}`)}
+                  </td>
+                }
                 <td className="hidden md:table-cell"></td>
               </tr>
             </tfoot>

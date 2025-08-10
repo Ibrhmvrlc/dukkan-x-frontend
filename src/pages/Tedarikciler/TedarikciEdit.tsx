@@ -4,7 +4,6 @@ import axios from '../../api/axios';
 import { Modal } from "../../components/ui/modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import TedarikciGenelFaturaForm from './TedarikciGenelFaturaForm';
-import SiparisListesi from '../Siparisler/SiparisListesi'; // aynı component kullanılabilir
 
 interface Tedarikci {
   id: number;

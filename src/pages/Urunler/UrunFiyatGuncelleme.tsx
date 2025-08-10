@@ -31,7 +31,7 @@ export default function FiyatGuncellemeSayfasi() {
   const navigate = useNavigate();
 
   // Güvenlik
-  const [userRoles, setUserRoles] = useState<string[]>([]);
+ // const [userRoles, setUserRoles] = useState<string[]>([]);
   const [canAccess, setCanAccess] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
   const [unlocked, setUnlocked] = useState<boolean>(false);
@@ -55,7 +55,7 @@ export default function FiyatGuncellemeSayfasi() {
       try {
         const me = await axios.get("/me");
         const roles: string[] = me.data?.roles ?? [];
-        setUserRoles(roles);
+        
         setCanAccess(roles.some((r) => ALLOWED_ROLES.includes((r || "").toLowerCase())));
       } catch {
         setCanAccess(false);
@@ -172,11 +172,8 @@ export default function FiyatGuncellemeSayfasi() {
   if (!canAccess) {
     return (
       <div className="max-w-xl mx-auto mt-10 p-6 rounded-2xl border border-gray-200 dark:border-white/10">
-        <h2 className="text-lg font-semibold mb-2 text-red-600">Erişim Engellendi (403)</h2>
+        <h2 className="text-lg font-semibold mb-2 text-red-800">Erişim Engellendi (403)</h2>
         <p className="text-sm text-gray-600 dark:text-white/80">Bu sayfayı görüntüleme yetkiniz bulunmuyor.</p>
-        <div className="mt-4">
-          <Button onClick={() => navigate(REDIRECT_PATH)}>Anasayfaya Dön</Button>
-        </div>
       </div>
     );
   }

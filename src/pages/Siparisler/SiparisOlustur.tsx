@@ -1,19 +1,50 @@
 // SiparisOlustur.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../api/axios';
 import Button from '../../components/ui/button/Button';
 import { toast } from 'react-toastify';
 
+type Urun = {
+  id: number;
+  isim: string;
+  cesit?: string | null;
+  stok_miktari?: number | string | null;
+  satis_fiyati: number | string;
+  kdv_orani?: number | string | null; // ÜRÜN TABLOSUNDAN
+};
+
+type SepetItem = {
+  urun_id: number;
+  miktar: number;
+  fiyat: number;       // birim fiyat
+  kdv_orani: number;   // sadece önizleme için (backend yine üründen alıyor)
+  iskonto?: number;    // item bazlı override istersen kullanırsın
+};
+
+// güvenli sayı dönüştürücü
+const toNum = (v: unknown): number => {
+  if (typeof v === 'number') return isFinite(v) ? v : 0;
+  if (v == null) return 0;
+  const n = parseFloat(String(v).replace(/\s/g, ''));
+  return isNaN(n) ? 0 : n;
+};
+
+// para formatlayıcı
+const money = (n: unknown) =>
+  new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    .format(toNum(n)) + ' ₺';
+
 export default function SiparisOlustur() {
   const { musteriId } = useParams();
+  const musteriNumericId = useMemo(() => toNum(musteriId), [musteriId]);
   const navigate = useNavigate();
 
   const [musteri, setMusteri] = useState<any>(null);
-  const [urunler, setUrunler] = useState<any[]>([]);
+  const [urunler, setUrunler] = useState<Urun[]>([]);
   const [search, setSearch] = useState('');
-  const [miktarlar, setMiktarlar] = useState<{ [key: number]: number }>({});
-  const [sepet, setSepet] = useState<any[]>([]);
+  const [miktarlar, setMiktarlar] = useState<Record<number, number>>({});
+  const [sepet, setSepet] = useState<SepetItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [not, setNot] = useState('');
   const [teslimatAdresiId, setTeslimatAdresiId] = useState<number | null>(null);
@@ -22,51 +53,51 @@ export default function SiparisOlustur() {
   const [yetkililer, setYetkililer] = useState<any[]>([]);
 
   useEffect(() => {
-    axios.get(`/v1/siparisler/create/${musteriId}`).then(res => {
+    let mounted = true;
+    axios.get(`/v1/siparisler/create/${musteriNumericId}`).then(res => {
+      if (!mounted) return;
       setMusteri(res.data.musteri);
-      setUrunler(res.data.urunler);
-      setTeslimatAdresleri(res.data.teslimat_adresleri);
-      setYetkililer(res.data.yetkililer);
+      setUrunler(res.data.urunler || []);
+      setTeslimatAdresleri(res.data.teslimat_adresleri || []);
+      setYetkililer(res.data.yetkililer || []);
       setLoading(false);
+    }).catch(err => {
+      console.error(err?.response?.data ?? err);
+      setLoading(false);
+      toast.error('Veriler alınamadı.');
     });
-  }, [musteriId]);
+    return () => { mounted = false; };
+  }, [musteriNumericId]);
 
   const handleMiktarDegistir = (urunId: number, fark: number) => {
     setMiktarlar(prev => {
       const yeniDeger = (prev[urunId] || 1) + fark;
-      return {
-        ...prev,
-        [urunId]: yeniDeger < 1 ? 1 : yeniDeger
-      };
+      return { ...prev, [urunId]: Math.max(yeniDeger, 1) };
     });
   };
 
   const handleSepeteEkle = (urunId: number) => {
     const urun = urunler.find(u => u.id === urunId);
+    if (!urun) return;
     const miktar = miktarlar[urunId] || 1;
+    const fiyat = toNum(urun.satis_fiyati);
+    const kdvOran = toNum(urun.kdv_orani); // üründen oku
 
-    const mevcut = sepet.find(item => item.urun_id === urunId);
-    if (mevcut) {
-      setSepet(sepet.map(item =>
-        item.urun_id === urunId
-          ? { ...item, miktar: item.miktar + miktar }
-          : item
-      ));
-    } else {
-      setSepet([...sepet, {
-        urun_id: urun.id,
-        miktar,
-        fiyat: urun.satis_fiyati
-      }]);
-    }
+    setSepet(prev => {
+      const mevcut = prev.find(it => it.urun_id === urunId);
+      if (mevcut) {
+        return prev.map(it =>
+          it.urun_id === urunId ? { ...it, miktar: it.miktar + miktar, fiyat, kdv_orani: kdvOran } : it
+        );
+      }
+      return [...prev, { urun_id: urunId, miktar, fiyat, kdv_orani: kdvOran }];
+    });
   };
 
   const updateSepetMiktar = (urunId: number, fark: number) => {
     setSepet(prev =>
       prev.map(item =>
-        item.urun_id === urunId
-          ? { ...item, miktar: Math.max(item.miktar + fark, 1) }
-          : item
+        item.urun_id === urunId ? { ...item, miktar: Math.max(item.miktar + fark, 1) } : item
       )
     );
   };
@@ -77,31 +108,46 @@ export default function SiparisOlustur() {
 
   // Siparişi gönder
   const handleSubmit = async () => {
+    if (!yetkiliId || !teslimatAdresiId) {
+      toast.error('Lütfen yetkili ve teslimat adresi seçin.', { position: 'top-right' });
+      return;
+    }
+    if (sepet.length === 0) {
+      toast.error('Sepet boş.', { position: 'top-right' });
+      return;
+    }
+
     try {
-      const res = await axios.post('/v1/siparisler', {
-        musteri_id: musteriId,
+      const payload = {
+        musteri_id: musteriNumericId,
         urunler: sepet.map(item => ({
           urun_id: item.urun_id,
           miktar: item.miktar,
           fiyat: item.fiyat,
+          // kdv gönderme—backend üründen okuyacak. İstersen override için item.kdv_orani gönderebilirsin:
+          // kdv: item.kdv_orani
+          // iskonto: item.iskonto ?? 0
         })),
         yetkili_id: yetkiliId,
-        kdv: 10,
-        iskonto: 0,
-        not: not,
+        not,
         teslimat_adresi_id: teslimatAdresiId,
-      });
+        // genel iskonto/kdv yok; kalem bazlı çalışıyoruz
+      };
 
-      if (!yetkiliId || !teslimatAdresiId) {
-        toast.error('Lütfen yetkili ve teslimat adresi seçin.', { position: 'top-right' });
-        return;
-      }
+      const res = await axios.post('/v1/siparisler', payload);
 
       toast.success('Sipariş başarıyla oluşturuldu!', { position: 'top-right' });
-      navigate(`/siparisler/${res.data.siparis_id}`); // İstersen listeye de dönebilirsin
+      // backend'de biz 'data' => $siparis->id dönmüştük
+      const yeniId = res?.data?.data;
+      if (yeniId) {
+        navigate(`/siparisler/${yeniId}`);
+      } else {
+        // ya da müşterinin sipariş listesine dön
+        navigate(`/musteriler/${musteriNumericId}/siparisler`);
+      }
     } catch (error: any) {
       console.error("Sipariş oluşturulamadı:", error);
-      const status = error.response?.status;
+      const status = error?.response?.status;
 
       if (status === 422) {
         const validationErrors = error.response.data.errors;
@@ -117,17 +163,41 @@ export default function SiparisOlustur() {
     }
   };
 
+  const filteredUrunler = useMemo(() => {
+    const q = (search || '').toLowerCase();
+    return (urunler || []).filter(u => (u.isim || '').toLowerCase().includes(q));
+  }, [urunler, search]);
 
-  const filteredUrunler = urunler.filter(u =>
-    u.isim.toLowerCase().includes(search.toLowerCase())
-  );
+  // Sepet toplamları (KDV oranlarına göre ayrışık)
+  const { araToplam, netToplam, kdvGruplari, toplamKdv, genelToplam } = useMemo(() => {
+    let ara = 0;
+    let net = 0;
+    const gruplar: Record<string, number> = {};
 
-  const toplamTutar = sepet.reduce((acc, item) => acc + item.miktar * item.fiyat, 0);
-  const kdvOrani = 10;
-  const iskontoOrani = 0;
-  const kdvTutari = toplamTutar * (kdvOrani / 100);
-  const iskontoTutari = toplamTutar * (iskontoOrani / 100);
-  const genelToplam = toplamTutar + kdvTutari - iskontoTutari;
+    sepet.forEach(item => {
+      const adet = toNum(item.miktar);
+      const fiyat = toNum(item.fiyat);
+      const brut = adet * fiyat;
+
+      // item.iskonto varsa burada uygula; yoksa 0
+      const isk = toNum(item.iskonto);
+      const netSatir = brut * (1 - isk / 100);
+
+      const kdv = toNum(item.kdv_orani);
+      const kdvTutar = netSatir * (kdv / 100);
+
+      ara += brut;
+      net += netSatir;
+
+      const key = String(kdv);
+      gruplar[key] = (gruplar[key] ?? 0) + kdvTutar;
+    });
+
+    const toplamKdv = Object.values(gruplar).reduce((a, b) => a + b, 0);
+    const genel = net + toplamKdv;
+
+    return { araToplam: ara, netToplam: net, kdvGruplari: gruplar, toplamKdv, genelToplam: genel };
+  }, [sepet]);
 
   if (loading) {
     return (
@@ -148,7 +218,7 @@ export default function SiparisOlustur() {
       <div className="lg:col-span-2 space-y-4 dark:text-gray-100">
         <div className="sticky top-9 bg-white dark:bg-gray-900 z-10 rounded shadow">
           <h1 className="text-lg font-bold pt-2 pl-2">Sipariş Oluştur</h1>
-          <small className='pt-2 pl-2'>{musteri.unvan}</small>
+          <small className='pt-2 pl-2'>{musteri?.unvan}</small>
           <input
             type="text"
             placeholder="Ürün ara..."
@@ -163,8 +233,10 @@ export default function SiparisOlustur() {
             <div key={urun.id} className="border p-4 rounded shadow bg-white dark:bg-gray-800 dark:border-gray-500">
               <p className="font-semibold truncate" title={urun.isim}>{urun.isim}</p>
               <p className="text-sm text-gray-500">{urun.cesit}</p>
-              <p className="text-green-600 font-bold">{urun.satis_fiyati} ₺</p>
-              <p className="text-xs text-gray-500">Stok: {urun.stok_miktari}</p>
+              <p className="text-green-600 font-bold">{money(urun.satis_fiyati)}</p>
+              <p className="text-xs text-gray-500">Stok: {toNum(urun.stok_miktari)}</p>
+              <p className="text-xs text-gray-500">KDV: %{toNum(urun.kdv_orani).toFixed(2)}</p>
+
               <div className="flex items-center gap-2 mt-3">
                 <button onClick={() => handleMiktarDegistir(urun.id, -1)} className="px-2 py-1 bg-gray-300 rounded dark:text-gray-800">−</button>
                 <span>{miktarlar[urun.id] || 1}</span>
@@ -177,8 +249,9 @@ export default function SiparisOlustur() {
       </div>
 
       <div className="sticky top-19 h-fit bg-white dark:bg-gray-900 p-4 border rounded shadow dark:text-gray-100 dark:border-gray-500">
-        <small>{musteri.unvan}</small>
+        <small>{musteri?.unvan}</small>
         <h2 className="text-lg font-semibold mb-4">Sepet</h2>
+
         {sepet.length === 0 ? (
           <p className="text-sm text-gray-500">Henüz ürün seçilmedi.</p>
         ) : (
@@ -186,17 +259,22 @@ export default function SiparisOlustur() {
             {sepet.map((item, idx) => {
               const urun = urunler.find(u => u.id === item.urun_id);
               if (!urun) return null;
+              const adet = toNum(item.miktar);
+              const fiyat = toNum(item.fiyat);
+              const satir = adet * fiyat;
               return (
                 <div key={idx} className="flex justify-between items-center text-sm border-b pb-1">
                   <div className="flex-1 min-w-0">
                     <div className="scrolling-text-container" title={urun.isim}>
                       <span className="scrolling-text" data-text={urun.isim}>{urun.isim}</span>
                     </div>
-                    <p className="text-xs text-gray-500 truncate">{item.miktar} x {item.fiyat} ₺</p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {adet} x {money(fiyat)} = <strong>{money(satir)} (+ %{toNum(item.kdv_orani).toFixed(2)} KDV)</strong>
+                    </p>
                   </div>
                   <div className="flex items-center gap-1 ml-2">
                     <button onClick={() => updateSepetMiktar(item.urun_id, -1)} className="px-2 bg-gray-200 rounded dark:text-gray-800">−</button>
-                    <span>{item.miktar}</span>
+                    <span>{adet}</span>
                     <button onClick={() => updateSepetMiktar(item.urun_id, 1)} className="px-2 bg-gray-200 rounded dark:text-gray-800">+</button>
                   </div>
                   <button onClick={() => removeFromSepet(item.urun_id)} className="text-red-500 text-xs ml-2">✕</button>
@@ -204,15 +282,25 @@ export default function SiparisOlustur() {
               );
             })}
 
-            <div className="border-t pt-2 mt-2 text-sm">
-              <div className="flex justify-between"><span>Ara Toplam:</span><span>{toplamTutar.toFixed(2)} ₺</span></div>
-              <div className="flex justify-between"><span>KDV ({kdvOrani}%):</span><span>{kdvTutari.toFixed(2)} ₺</span></div>
-              <div className="flex justify-between"><span>İskonto:</span><span>{iskontoTutari.toFixed(2)} ₺</span></div>
-              <div className="flex justify-between font-bold text-base mt-2"><span>Genel Toplam:</span><span>{genelToplam.toFixed(2)} ₺</span></div>
+            <div className="border-t pt-2 mt-2 text-sm space-y-1">
+              <div className="flex justify-between"><span>Ara Toplam (iskontosuz):</span><span>{money(araToplam)}</span></div>
+              <div className="flex justify-between"><span>Net Toplam (iskontolu, KDV hariç):</span><span>{money(netToplam)}</span></div>
+
+              {/* KDV oranlarına göre ayrıştırılmış toplamlar */}
+              {Object.entries(kdvGruplari)
+                .sort(([a],[b]) => toNum(a) - toNum(b))
+                .map(([oran, tutar]) => (
+                  <div key={oran} className="flex justify-between">
+                    <span>KDV (%{oran}):</span>
+                    <span>{money(tutar)}</span>
+                  </div>
+                ))}
+              <div className="flex justify-between text-base mt-2"><span>Toplam KDV:</span><span>{money(toplamKdv)}</span></div>
+              <div className="flex justify-between font-bold text-base mt-2"><span>Genel Toplam:</span><span>{money(genelToplam)}</span></div>
             </div>
 
             <textarea
-              className="w-full mt-4 p-2 border rounded text-sm"
+              className="w-full mt-4 p-2 border rounded text-sm dark:bg-gray-900"
               placeholder="Sipariş notu..."
               value={not}
               onChange={(e) => setNot(e.target.value)}
@@ -221,13 +309,13 @@ export default function SiparisOlustur() {
             <select
               className="w-full mt-2 p-2 border rounded text-sm dark:bg-gray-900"
               value={teslimatAdresiId ?? ''}
-             onChange={(e) => {
+              onChange={(e) => {
                 const val = Number(e.target.value);
                 setTeslimatAdresiId(!isNaN(val) ? val : null);
               }}
             >
               <option value="" disabled>⟶ Teslimat adresi seçin</option>
-              {teslimatAdresleri.map(adres => (
+              {teslimatAdresleri.map((adres: any) => (
                 <option key={adres.id} value={adres.id}>
                   {adres.baslik} - {adres.adres}
                 </option>
@@ -241,10 +329,9 @@ export default function SiparisOlustur() {
                 const val = Number(e.target.value);
                 setYetkiliId(!isNaN(val) ? val : null);
               }}
-
             >
               <option value="" disabled>⟶ Yetkili Seçin</option>
-              {yetkililer.map(yetkili => (
+              {yetkililer.map((yetkili: any) => (
                 <option key={yetkili.id} value={yetkili.id}>
                   {yetkili.isim} - {yetkili.pozisyon} - {yetkili.telefon}
                 </option>
@@ -256,7 +343,7 @@ export default function SiparisOlustur() {
         <Button
           onClick={handleSubmit}
           className="bg-green-600 text-white hover:bg-green-700 mt-4 w-full"
-          disabled={sepet.length === 0 || teslimatAdresiId === null}
+          disabled={sepet.length === 0 || teslimatAdresiId === null || yetkiliId === null}
         >
           Siparişi Kaydet
         </Button>

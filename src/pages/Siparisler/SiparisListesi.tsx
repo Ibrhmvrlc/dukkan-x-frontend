@@ -95,7 +95,7 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
         return (
           <div
             key={siparis.id}
-            className="flex flex-col justify-between border p-4 rounded shadow bg-white dark:bg-gray-900 dark:text-gray-100
+            className="flex flex-col justify-between border p-4 rounded shadow bg-white dark:bg-gray-900 dark:text-gray-100 dark:border-white/20
                        max-h-none overflow-visible sm:max-h-[400px] sm:overflow-y-auto"
             style={{ scrollbarWidth: "thin", scrollbarColor: "#888 #f1f1f1" }}
           >
@@ -117,7 +117,7 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
                 const kdv = toNum(item.kdv_orani);
 
                 return (
-                  <div key={i} className="border-b pb-1">
+                  <div key={i} className="border-b pb-1 dark:border-white/50">
                     <div className="flex justify-between text-sm">
                       <span>{item.urun?.isim ?? "Ürün Bilgisi Yok"}</span>
                       <span>
@@ -133,7 +133,7 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
               })}
 
               {/* Özet */}
-              <div className="border-t pt-2 text-sm space-y-1">
+              <div className="border-t pt-2 text-sm space-y-1 dark:border-white/50">
                 <div className="flex justify-between">
                   <span>Ara Toplam (iskontosuz):</span>
                   <span>{money(araToplam)}</span>

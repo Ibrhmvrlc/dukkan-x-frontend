@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import SiparisListesi from '../../pages/Siparisler/SiparisListesi';
 
 import { Modal } from "../../components/ui/modal";
+import MusteriOzelFiyatListesi from './MusteriOzelFiyatListesi';
 
 interface Tur {
   id: number;
@@ -214,6 +215,12 @@ export default function MusteriEdit() {
               className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
             >
               Siparişler
+            </TabsTrigger>
+            <TabsTrigger
+              value="fiyat"
+              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
+            >
+              Fiyat
             </TabsTrigger>
             <TabsTrigger
               value="finans"
@@ -580,6 +587,15 @@ export default function MusteriEdit() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Siparişler</h3>
               <SiparisListesi musteriId={musteri.id!} />
+            </div>
+          </TabsContent>
+          <TabsContent value="fiyat">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                Müşteriye Özel Fiyat Listesi
+              </h3>
+
+              <MusteriOzelFiyatListesi musteriId={musteri.id!} />
             </div>
           </TabsContent>
           <TabsContent value="finans">

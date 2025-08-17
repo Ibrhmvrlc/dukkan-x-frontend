@@ -64,6 +64,8 @@ export default function MusteriEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<'ozet'|'siparisler'|'fiyat'|'finans'|'destek'>('ozet');
+
   
   const [musteri, setMusteri] = useState<Musteri>({
     id: 0,
@@ -201,41 +203,118 @@ export default function MusteriEdit() {
         </div>
       </div>
 
-      <Tabs defaultValue="ozet" className="w-full">
-        <div className="">
-          <TabsList className="grid grid-cols-4 text-center">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
+        {/* Mobil: dropdown (taşma sıfır, UX net) */}
+        <div className="sm:hidden mb-3">
+          <label className="sr-only">Sekme seç</label>
+          <select
+            value={tab}
+            onChange={(e) => setTab(e.target.value as any)}
+            className="block w-full rounded-xl border px-3 py-2 text-sm
+                      bg-white dark:bg-transparent dark:text-gray-300 dark:border-white/10"
+          >
+            <option value="ozet">Özet Bilgiler</option>
+            <option value="siparisler">Siparişler</option>
+            <option value="fiyat">Fiyat Listesi</option>
+            <option value="finans">Finans</option>
+            <option value="destek">Destek</option>
+          </select>
+        </div>
+
+        {/* Tablet/desktop: underline tabs (wrap'lı, kutusuz) */}
+        <div className="hidden sm:block">
+          <TabsList
+            className="
+              !flex !flex-wrap w-full items-center
+              gap-x-6 gap-y-3
+              border-b border-gray-200 dark:border-white/10
+              !bg-transparent !p-0 !rounded-none !shadow-none
+            "
+          >
             <TabsTrigger
               value="ozet"
-              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
+              className="
+                relative px-0 py-2 text-sm font-semibold
+                text-gray-600 dark:text-gray-300 whitespace-nowrap
+                data-[state=active]:text-blue-600
+                after:absolute after:left-0 after:bottom-[-1px]
+                after:h-[2px] after:w-full after:bg-blue-600 after:scale-x-0
+                data-[state=active]:after:scale-x-100
+                after:transition-transform after:origin-left
+              "
             >
               Özet Bilgiler
             </TabsTrigger>
+
             <TabsTrigger
               value="siparisler"
-              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
+              className="
+                relative px-0 py-2 text-sm font-semibold
+                text-gray-600 dark:text-gray-300 whitespace-nowrap
+                data-[state=active]:text-blue-600
+                after:absolute after:left-0 after:bottom-[-1px]
+                after:h-[2px] after:w-full after:bg-blue-600 after:scale-x-0
+                data-[state=active]:after:scale-x-100
+                after:transition-transform after:origin-left
+              "
             >
               Siparişler
             </TabsTrigger>
+
             <TabsTrigger
               value="fiyat"
-              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
+              className="
+                relative px-0 py-2 text-sm font-semibold
+                text-gray-600 dark:text-gray-300 whitespace-nowrap
+                data-[state=active]:text-blue-600
+                after:absolute after:left-0 after:bottom-[-1px]
+                after:h-[2px] after:w-full after:bg-blue-600 after:scale-x-0
+                data-[state=active]:after:scale-x-100
+                after:transition-transform after:origin-left
+              "
             >
-              Fiyat
+              Fiyat Listesi
             </TabsTrigger>
+
             <TabsTrigger
               value="finans"
-              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
+              className="
+                relative px-0 py-2 text-sm font-semibold
+                text-gray-600 dark:text-gray-300 whitespace-nowrap
+                data-[state=active]:text-blue-600
+                after:absolute after:left-0 after:bottom-[-1px]
+                after:h-[2px] after:w-full after:bg-blue-600 after:scale-x-0
+                data-[state=active]:after:scale-x-100
+                after:transition-transform after:origin-left
+              "
             >
               Finans
             </TabsTrigger>
+
             <TabsTrigger
               value="destek"
-              className="w-full px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 transition-colors"
+              className="
+                relative px-0 py-2 text-sm font-semibold
+                text-gray-600 dark:text-gray-300 whitespace-nowrap
+                data-[state=active]:text-blue-600
+                after:absolute after:left-0 after:bottom-[-1px]
+                after:h-[2px] after:w-full after:bg-blue-600 after:scale-x-0
+                data-[state=active]:after:scale-x-100
+                after:transition-transform after:origin-left
+              "
             >
               Destek
             </TabsTrigger>
           </TabsList>
         </div>
+
+
+
+
+
+ 
+
+
 
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-b-xl p-6 rounded-xl">
           <TabsContent value="ozet">

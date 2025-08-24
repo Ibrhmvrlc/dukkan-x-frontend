@@ -198,7 +198,7 @@ export default function MusteriOzelFiyatListesi({ musteriId }: Props) {
               <th className="px-4 py-3 text-left font-medium">Marka</th>
               <th className="px-4 py-3 text-left font-medium">Ürün</th>
               <th className="px-4 py-3 text-right font-medium">Liste Fiyatı</th>
-              <th className="px-4 py-3 text-right font-medium">İskonto %</th>
+              <th className="px-4 py-3 text-right font-medium hidden md:table-cell">İskonto %</th>
               <th className="px-4 py-3 text-right font-medium">Özel Fiyat</th>
             </tr>
           </thead>
@@ -217,7 +217,7 @@ export default function MusteriOzelFiyatListesi({ musteriId }: Props) {
                     {trCurrency.format(r.liste_fiyati)}
                   </span>
                 </td>
-                <td className="px-4 py-2 align-middle text-right">
+                <td className="px-4 py-2 align-middle text-right hidden md:table-cell">
                   {r.iskonto_orani.toFixed(2)}
                 </td>
                 <td className="px-4 py-2 align-middle text-right font-semibold">

@@ -7,6 +7,7 @@ import MusteriTeslimatAdresleriForm from './MusteriTeslimatAdresleriForm';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import SiparisListesi from '../../pages/Siparisler/SiparisListesi';
+import MusteriEkstre from '../../pages/Musteriler/MusteriEkstre';
 
 import { Modal } from "../../components/ui/modal";
 import MusteriOzelFiyatListesi from './MusteriOzelFiyatListesi';
@@ -64,7 +65,7 @@ export default function MusteriEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'ozet'|'siparisler'|'fiyat'|'finans'|'destek'>('ozet');
+  const [tab, setTab] = useState<'ozet'|'siparisler'|'fiyat'|'ekstre'|'destek'>('ozet');
 
   
   const [musteri, setMusteri] = useState<Musteri>({
@@ -214,9 +215,9 @@ export default function MusteriEdit() {
                       bg-white dark:bg-transparent dark:text-gray-300 dark:border-white/10"
           >
             <option value="ozet">Özet Bilgiler</option>
-            <option value="siparisler">Siparişler</option>
             <option value="fiyat">Fiyat Listesi</option>
-            <option value="finans">Finans</option>
+            <option value="siparisler">Siparişler</option>
+            <option value="ekstre">Ekstre</option>
             <option value="destek">Destek</option>
           </select>
         </div>
@@ -247,21 +248,6 @@ export default function MusteriEdit() {
             </TabsTrigger>
 
             <TabsTrigger
-              value="siparisler"
-              className="
-                relative px-0 py-2 text-sm font-semibold
-                text-gray-600 dark:text-gray-300 whitespace-nowrap
-                data-[state=active]:text-blue-600
-                after:absolute after:left-0 after:bottom-[-1px]
-                after:h-[2px] after:w-full after:bg-blue-600 after:scale-x-0
-                data-[state=active]:after:scale-x-100
-                after:transition-transform after:origin-left
-              "
-            >
-              Siparişler
-            </TabsTrigger>
-
-            <TabsTrigger
               value="fiyat"
               className="
                 relative px-0 py-2 text-sm font-semibold
@@ -277,7 +263,7 @@ export default function MusteriEdit() {
             </TabsTrigger>
 
             <TabsTrigger
-              value="finans"
+              value="siparisler"
               className="
                 relative px-0 py-2 text-sm font-semibold
                 text-gray-600 dark:text-gray-300 whitespace-nowrap
@@ -288,7 +274,22 @@ export default function MusteriEdit() {
                 after:transition-transform after:origin-left
               "
             >
-              Finans
+              Siparişler
+            </TabsTrigger>
+            
+            <TabsTrigger
+              value="ekstre"
+              className="
+                relative px-0 py-2 text-sm font-semibold
+                text-gray-600 dark:text-gray-300 whitespace-nowrap
+                data-[state=active]:text-blue-600
+                after:absolute after:left-0 after:bottom-[-1px]
+                after:h-[2px] after:w-full after:bg-blue-600 after:scale-x-0
+                data-[state=active]:after:scale-x-100
+                after:transition-transform after:origin-left
+              "
+            >
+              Ekstre
             </TabsTrigger>
 
             <TabsTrigger
@@ -677,8 +678,11 @@ export default function MusteriEdit() {
               <MusteriOzelFiyatListesi musteriId={musteri.id!} />
             </div>
           </TabsContent>
-          <TabsContent value="finans">
-            {/* Finans içeriği */}
+          <TabsContent value="ekstre">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Ekstre</h3>
+              <MusteriEkstre musteriId={musteri.id!} />
+            </div>
           </TabsContent>
           <TabsContent value="destek">
             {/* Destek içeriği */}

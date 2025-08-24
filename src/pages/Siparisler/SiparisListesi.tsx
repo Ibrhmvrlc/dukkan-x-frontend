@@ -24,6 +24,7 @@ type Siparis = {
   teslimat_adresi_id?: number | null;
   yetkili?: { isim?: string | null };
   teslimat_adresi?: { adres?: string | null };
+  not: string | null;
   urunler: UrunKalem[];
 };
 
@@ -269,26 +270,45 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
   };
 
   const saveEdit = async () => {
-    if (!editing) return;
-    const temiz: Siparis = JSON.parse(JSON.stringify(editing));
-    temiz.urunler = (temiz.urunler || []).map((u) => ({
-      ...u,
-      adet: toNum(u.adet),
-      birim_fiyat: toNum(u.birim_fiyat),
-      iskonto_orani: toNum(u.iskonto_orani),
-      kdv_orani: toNum(u.kdv_orani),
-    }));
+  if (!editing) return;
 
-    try {
-      setSaving(true);
-      await axios.put(`/v1/siparisler/${temiz.id}`, temiz);
-      setSiparisler((prev) => prev.map((s) => (s.id === temiz.id ? { ...s, ...temiz } : s)));
-      closeEdit();
-    } catch (err) {
-      console.error("Kaydetme hatası:", err);
-      setSaving(false);
-    }
-  };
+  const temiz: Siparis = JSON.parse(JSON.stringify(editing));
+
+  // Yalnızca *_id alanlarını bırak, nested objeleri at
+  if ('yetkili' in temiz) delete (temiz as any).yetkili;
+  if ('teslimat_adresi' in temiz) delete (temiz as any).teslimat_adresi;
+
+  // urun objesini -> urun_id + pivot alanlarına çevir
+  (temiz as any).urunler = (temiz.urunler || [])
+    .map((u: any) => {
+      const urun_id = u.urun?.id ?? u.urun_id; // her iki olasılığı da karşıla
+      return {
+        urun_id,
+        adet: toNum(u.adet),
+        birim_fiyat: toNum(u.birim_fiyat),
+        iskonto_orani: toNum(u.iskonto_orani),
+        kdv_orani: toNum(u.kdv_orani),
+      };
+    })
+    // Geçersiz kayıtları ele (NaN vb.)
+    .filter((u: any) =>
+      Number.isFinite(u.urun_id) &&
+      Number.isFinite(u.adet) &&
+      Number.isFinite(u.birim_fiyat)
+    );
+
+  try {
+    setSaving(true);
+    console.log("Kaydet (payload):", temiz);
+    await axios.put(`/v1/siparisler/${temiz.id}`, temiz);
+    setSiparisler(prev => prev.map(s => (s.id === temiz.id ? { ...s, ...editing } : s)));
+    closeEdit();
+  } catch (err) {
+    console.error("Kaydetme hatası:", err);
+    setSaving(false);
+  }
+};
+
 
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return "-";
@@ -405,6 +425,7 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
               <div className="mt-4 text-xs text-gray-400">
                 {siparis.yetkili?.isim && <p>Yetkili: {siparis.yetkili.isim}</p>}
                 {siparis.teslimat_adresi?.adres && <p className="truncate">Adres: {siparis.teslimat_adresi.adres}</p>}
+                {siparis.not && <p className="truncate">Not: {siparis.not}</p>}
               </div>
             </div>
           );
@@ -455,7 +476,7 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
         <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h3 className="text-lg font-semibold">{editing ? `Sipariş #${editing.id} Düzenle` : "Düzenle"}</h3>
+              <h3 className="text-lg font-semibold dark:text-gray-300">{editing ? `Sipariş #${editing.id} Düzenle` : "Düzenle"}</h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">Özet üzerinde değişiklik yapabilirsiniz.</p>
             </div>
             <button className="px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300 dark:bg-white/10 dark:hover:bg-white/20" onClick={closeEdit} disabled={saving}></button>
@@ -466,22 +487,22 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
               {/* Üst alanlar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
                 {/* Tarih */}
-                <div className="flex flex-col">
-                  <label className="text-[11px] mb-0.5 text-gray-500 dark:text-gray-400">Tarih</label>
+                <div className="flex flex-col md:col-span-1">
+                  <label className="text-[11px] mb-0.5 text-gray-500 dark:text-gray-300">Tarih</label>
                   <input
                     type="date"
-                    className="h-9 px-2 rounded border bg-white dark:bg-transparent dark:border-white/10"
+                    className="h-9 px-2 rounded border bg-white dark:bg-transparent dark:border-white/10 dark:text-gray-400"
                     value={editing.tarih ? new Date(editing.tarih).toISOString().slice(0, 10) : ""}
                     onChange={(e) => onFieldChange("tarih", e.target.value)}
                   />
                 </div>
 
                 {/* Fatura No */}
-                <div className="flex flex-col">
-                  <label className="text-[11px] mb-0.5 text-gray-500 dark:text-gray-400">Fatura No</label>
+                <div className="flex flex-col md:col-span-1">
+                  <label className="text-[11px] mb-0.5 text-gray-500 dark:text-gray-300">Fatura No</label>
                   <input
                     type="text"
-                    className="h-9 px-2 rounded border bg-white dark:bg-transparent dark:border-white/10"
+                    className="h-9 px-2 rounded border bg-white dark:bg-transparent dark:border-white/10 dark:text-gray-400"
                     value={String(editing.fatura_no ?? "")}
                     onChange={(e) => onFieldChange("fatura_no", e.target.value)}
                     placeholder="Boş ise beklemede"
@@ -489,10 +510,10 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
                 </div>
 
                 {/* Yetkili (select) */}
-                <div className="flex flex-col col-span-2 sm:col-span-1">
-                  <label className="text-[11px] mb-0.5 text-gray-500 dark:text-gray-400">Yetkili</label>
+                <div className="flex flex-col md:col-span-2 sm:col-span-1">
+                  <label className="text-[11px] mb-0.5 text-gray-500 dark:text-gray-300">Yetkili</label>
                   <select
-                    className="h-9 px-2 rounded border bg-white dark:bg-transparent dark:border-white/10"
+                    className="h-9 px-2 rounded border bg-white dark:bg-transparent dark:border-white/10 dark:text-gray-400"
                     value={String(editing.yetkili_id ?? "")}
                     onChange={(e) => {
                       const valStr = e.target.value;
@@ -512,10 +533,10 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
                 </div>
 
                 {/* Teslimat Adresi (select) */}
-                <div className="flex flex-col col-span-2 sm:col-span-1">
-                  <label className="text-[11px] mb-0.5 text-gray-500 dark:text-gray-400">Teslimat Adresi</label>
+                <div className="flex flex-col md:col-span-2 sm:col-span-1">
+                  <label className="text-[11px] mb-0.5 text-gray-500 dark:text-gray-300">Teslimat Adresi</label>
                   <select
-                    className="h-9 px-2 rounded border bg-white dark:bg-transparent dark:border-white/10"
+                    className="h-9 px-2 rounded border bg-white dark:bg-transparent dark:border-white/10 dark:text-gray-400"
                     value={String(editing.teslimat_adresi_id ?? "")}
                     onChange={(e) => {
                       const valStr = e.target.value;
@@ -532,6 +553,18 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* NOT alanı – tarih/fatura/yetkili/adres grid'inin ALTINA koy */}
+                <div className="flex flex-col md:col-span-2">
+                  <label className="text-[11px] mb-0.5 text-gray-500 dark:text-gray-300">Not</label>
+                  <input
+                    type="text"
+                    className="h-9 px-2 rounded border bg-white dark:bg-transparent dark:border-white/10 dark:text-gray-400"
+                    value={String(editing.not ?? "")}
+                    onChange={(e) => onFieldChange("not", e.target.value)}
+                    placeholder="Sipariş notu..."
+                  />
                 </div>
               </div>
 
@@ -552,7 +585,7 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
                     >
                       {/* Ürün ismi */}
                       <div className="mb-2">
-                        <span className="block text-sm font-medium truncate">
+                        <span className="block text-sm font-medium truncate dark:text-gray-300">
                           {item.urun?.isim ?? "Ürün"}
                         </span>
                       </div>
@@ -560,44 +593,44 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
                       {/* Inputlar: ikili ikili mobilde, geniş ekranda 4lü */}
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="shrink-0 text-[11px] text-gray-500">Adet</span>
+                          <span className="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">Adet</span>
                           <input
                             type="number"
                             step="1"
-                            className="flex-1 w-full min-w-0 px-2 py-1 rounded border bg-white dark:bg-transparent dark:border-white/10 text-sm"
+                            className="flex-1 w-full min-w-0 px-2 py-1 rounded border bg-white dark:bg-transparent dark:border-white/10 text-sm dark:text-gray-400"
                             value={String(item.adet ?? "")}
                             onChange={(e) => onFieldChange(`urunler.${i}.adet`, e.target.value)}
                           />
                         </div>
 
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="shrink-0 text-[11px] text-gray-500">Fiyat</span>
+                          <span className="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">Fiyat</span>
                           <input
                             type="number"
                             step="0.01"
-                            className="flex-1 w-full min-w-0 px-2 py-1 rounded border bg-white dark:bg-transparent dark:border-white/10 text-sm"
+                            className="flex-1 w-full min-w-0 px-2 py-1 rounded border bg-white dark:bg-transparent dark:border-white/10 text-sm dark:text-gray-400"
                             value={String(item.birim_fiyat ?? "")}
                             onChange={(e) => onFieldChange(`urunler.${i}.birim_fiyat`, e.target.value)}
                           />
                         </div>
 
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="shrink-0 text-[11px] text-gray-500">İsk.%</span>
+                          <span className="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">İsk.%</span>
                           <input
                             type="number"
                             step="0.01"
-                            className="flex-1 w-full min-w-0 px-2 py-1 rounded border bg-white dark:bg-transparent dark:border-white/10 text-sm"
+                            className="flex-1 w-full min-w-0 px-2 py-1 rounded border bg-white dark:bg-transparent dark:border-white/10 text-sm dark:text-gray-400"
                             value={String(item.iskonto_orani ?? "")}
                             onChange={(e) => onFieldChange(`urunler.${i}.iskonto_orani`, e.target.value)}
                           />
                         </div>
 
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="shrink-0 text-[11px] text-gray-500">KDV%</span>
+                          <span className="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">KDV%</span>
                           <input
                             type="number"
                             step="0.01"
-                            className="flex-1 w-full min-w-0 px-2 py-1 rounded border bg-white dark:bg-transparent dark:border-white/10 text-sm"
+                            className="flex-1 w-full min-w-0 px-2 py-1 rounded border bg-white dark:bg-transparent dark:border-white/10 text-sm dark:text-gray-400"
                             value={String(item.kdv_orani ?? "")}
                             onChange={(e) => onFieldChange(`urunler.${i}.kdv_orani`, e.target.value)}
                           />
@@ -638,23 +671,23 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
                 const { araToplam, toplamIskonto, kdvGruplari, genelToplam } = hesaplaOzet(editing.urunler || []);
                 return (
                   <div className="border-t pt-2 text-sm space-y-1 dark:border-white/20">
-                    <div className="flex justify-between">
+                    <div className="flex justify-between dark:text-gray-400">
                       <span>Ara Toplam (iskontosuz):</span>
                       <span>{money(araToplam)}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between dark:text-gray-400">
                       <span>İskonto Toplamı:</span>
                       <span>-{money(toplamIskonto)}</span>
                     </div>
                     {Object.entries(kdvGruplari)
                       .sort(([a], [b]) => toNum(a) - toNum(b))
                       .map(([oran, tutar]) => (
-                        <div key={oran} className="flex justify-between">
+                        <div key={oran} className="flex justify-between dark:text-gray-400">
                           <span>KDV ({percent(oran)}):</span>
                           <span>{money(tutar)}</span>
                         </div>
                       ))}
-                    <div className="flex justify-between font-bold mt-2">
+                    <div className="flex justify-between font-bold mt-2 dark:text-gray-300">
                       <span>Genel Toplam:</span>
                       <span>{money(genelToplam)}</span>
                     </div>
@@ -664,7 +697,7 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
 
               {/* Aksiyonlar */}
               <div className="flex items-center justify-end gap-2 pt-2">
-                <button className="px-3 py-1.5 rounded border text-sm dark:border-white/10" onClick={closeEdit} disabled={saving}>
+                <button className="px-3 py-1.5 rounded border text-sm dark:border-white/10 dark:text-gray-400" onClick={closeEdit} disabled={saving}>
                   Vazgeç
                 </button>
                 <button className="px-3 py-1.5 rounded text-sm bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60" onClick={saveEdit} disabled={saving}>

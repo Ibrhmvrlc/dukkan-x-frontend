@@ -36,6 +36,7 @@ import UrunFiyatGuncelleme from "./pages/Urunler/UrunFiyatGuncelleme.tsx";
 import SiparisOlustur from "./pages/Siparisler/SiparisOlustur.tsx";
 import TedarikciList from "./pages/Tedarikciler/TedarikciList.tsx";
 import TedarikciEdit from "./pages/Tedarikciler/TedarikciEdit.tsx";
+import SiparisDetay from './pages/Siparisler/SiparisDetay.tsx';
 
 export default function App() {
   const { loading } = useAuth();
@@ -101,7 +102,9 @@ export default function App() {
           <Route path="/urunler/yeni" element={<YeniUrun />} />
           <Route path="/fiyat-guncelle" element={<UrunFiyatGuncelleme />} />
 
+          {/* Siparis Modülü */}
           <Route path="/siparisler/olustur/:musteriId" element={<SiparisOlustur />} />
+          <Route path="/siparisler/:id" element={<SiparisDetay />} />
 
           {/* Others Page */}
           <Route path="/profile" element={<UserProfiles />} />

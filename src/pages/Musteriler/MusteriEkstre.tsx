@@ -10,7 +10,7 @@ type Row = {
   belge_no?: string | number | null;
   borc: number;
   alacak: number;
-  bakiye: number;
+  bakiye: number; // sunucu: yalnızca onaylılar üstünden kümülatif
 };
 
 type EkstreResponse = {
@@ -20,9 +20,10 @@ type EkstreResponse = {
     per_page: number;
     current_page: number;
     last_page: number;
-    toplam_borc: number;
-    toplam_alacak: number;
-    bakiye: number;
+    toplam_borc: number;     // yalnızca onaylılar
+    toplam_alacak: number;   // yalnızca onaylılar
+    bakiye: number;          // yalnızca onaylılar (closing balance)
+    pending_count?: number;  // onay bekleyen adet (opsiyonel)
   };
 };
 
@@ -34,23 +35,33 @@ export default function Ekstre({ musteriId }: { musteriId: number }) {
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
 
+  // Özet değerleri sunucudan gelen meta ile tutuyoruz
   const [summary, setSummary] = useState({ borc: 0, alacak: 0, bakiye: 0 });
+  const [pendingCount, setPendingCount] = useState(0);
 
   const fetchData = async (p = 1) => {
     setLoading(true);
     try {
-      const res = await axios.get<EkstreResponse>(
-        `/v1/musteriler/${musteriId}/ekstre`,
-        { params: { page: p, per_page: 50, date_from: dateFrom || undefined, date_to: dateTo || undefined } }
-      );
-      setRows(res.data.data);
+      const res = await axios.get<EkstreResponse>(`/v1/musteriler/${musteriId}/ekstre`, {
+        params: {
+          page: p,
+          per_page: 50,
+          date_from: dateFrom || undefined,
+          date_to: dateTo || undefined,
+        },
+      });
+
+      setRows(res.data.data); // sunucu zaten sadece onaylıları döndürüyor
       setPage(res.data.meta.current_page);
       setLastPage(res.data.meta.last_page);
+
       setSummary({
         borc: res.data.meta.toplam_borc,
         alacak: res.data.meta.toplam_alacak,
         bakiye: res.data.meta.bakiye,
       });
+
+      setPendingCount(res.data.meta.pending_count ?? 0);
     } finally {
       setLoading(false);
     }
@@ -69,29 +80,56 @@ export default function Ekstre({ musteriId }: { musteriId: number }) {
 
   const onFilter = () => fetchData(1);
 
+  // Yardımcı fonksiyon
+  const formatDate = (d: string | null | undefined) => {
+    if (!d) return "-";
+    try {
+      return new Intl.DateTimeFormat("tr-TR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(d));
+    } catch {
+      return d; // parse edilemezse gelen stringi olduğu gibi göster
+    }
+  };
+
+
   return (
     <div className="space-y-4">
       {/* Filtreler */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col">
           <label className="text-xs text-gray-500 dark:text-gray-400">Başlangıç</label>
-          <input type="date" className="px-2 py-1.5 rounded border bg-white dark:bg-transparent dark:border-white/10"
-                 value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+          <input
+            type="date"
+            className="px-2 py-1.5 rounded border bg-white dark:bg-transparent dark:border-white/10"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+          />
         </div>
         <div className="flex flex-col">
           <label className="text-xs text-gray-500 dark:text-gray-400">Bitiş</label>
-          <input type="date" className="px-2 py-1.5 rounded border bg-white dark:bg-transparent dark:border-white/10"
-                 value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+          <input
+            type="date"
+            className="px-2 py-1.5 rounded border bg-white dark:bg-transparent dark:border-white/10"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+          />
         </div>
-        <button
-          onClick={onFilter}
-          className="h-9 px-4 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"
-        >
+        <button onClick={onFilter} className="h-9 px-4 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
           Filtrele
         </button>
       </div>
 
-      {/* Özet kartları */}
+      {/* Onay bekleyen bilgi çubuğu (listelenmez, sadece sayısı gösterilir) */}
+      {pendingCount > 0 && (
+        <div className="rounded-xl border border-amber-300/50 bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-200 px-4 py-3">
+          {pendingCount} adet <strong>onay bekleyen</strong> kayıt var. Bu kayıtlar belge numarası olmadığı için yani faturalandırılmadığı için ekstrede listelenmez.
+        </div>
+      )}
+
+      {/* Özet kartları (sunucunun onaylılara göre hesapladığı özet) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="rounded-xl border p-4 dark:border-white/10">
           <div className="text-xs text-gray-500">Toplam Borç (Siparişler)</div>
@@ -109,7 +147,7 @@ export default function Ekstre({ musteriId }: { musteriId: number }) {
         </div>
       </div>
 
-      {/* Tablo */}
+      {/* Tablo (sunucudan gelen onaylı kayıtlar) */}
       <div className="overflow-x-auto rounded-xl border dark:border-white/10">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-50 dark:bg-white/[0.02]">
@@ -128,42 +166,28 @@ export default function Ekstre({ musteriId }: { musteriId: number }) {
               <tr><td colSpan={7} className="px-3 py-6 text-center text-gray-500">Yükleniyor...</td></tr>
             ) : rows.length === 0 ? (
               <tr><td colSpan={7} className="px-3 py-6 text-center text-gray-500">Kayıt bulunamadı.</td></tr>
-            ) : rows.map((r) => (
-              <tr key={`${r.tur}-${r.id}`} className="border-t dark:border-white/5">
-                <td className="px-3 py-2 whitespace-nowrap">{r.tarih}</td>
-                <td className={`px-3 py-2 font-medium ${colorByType(r.tur)}`}>
-                  {r.tur === "siparis" ? "Sipariş" : "Tahsilat"}
-                </td>
-                <td className="px-3 py-2">{r.belge_no ?? "-"}</td>
-                <td className="px-3 py-2">{r.aciklama ?? "-"}</td>
-                <td className="px-3 py-2 text-right">{r.borc ? money(r.borc) : "-"}</td>
-                <td className="px-3 py-2 text-right">{r.alacak ? money(r.alacak) : "-"}</td>
-                <td className="px-3 py-2 text-right font-semibold">{money(r.bakiye)}</td>
-              </tr>
-            ))}
+            ) : (
+              rows.map((r) => (
+                <tr key={`${r.tur}-${r.id}`} className="border-t dark:border-white/5">
+                  <td className="px-3 py-2 whitespace-nowrap">{formatDate(r.tarih)}</td>
+                  <td className={`px-3 py-2 font-medium ${colorByType(r.tur)}`}>{r.tur === "siparis" ? "Sipariş" : "Tahsilat"}</td>
+                  <td className="px-3 py-2">{r.belge_no}</td>
+                  <td className="px-3 py-2">{r.aciklama ?? "-"}</td>
+                  <td className="px-3 py-2 text-right">{r.borc ? money(r.borc) : "-"}</td>
+                  <td className="px-3 py-2 text-right">{r.alacak ? money(r.alacak) : "-"}</td>
+                  <td className="px-3 py-2 text-right font-semibold">{money(r.bakiye)}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Sayfalama */}
       <div className="flex items-center justify-end gap-2">
-        <button
-          onClick={() => fetchData(Math.max(1, page - 1))}
-          disabled={page <= 1}
-          className="px-3 py-1.5 rounded border text-sm disabled:opacity-50"
-        >
-          Önceki
-        </button>
-        <div className="text-sm text-gray-600 dark:text-gray-300">
-          {page} / {lastPage}
-        </div>
-        <button
-          onClick={() => fetchData(Math.min(lastPage, page + 1))}
-          disabled={page >= lastPage}
-          className="px-3 py-1.5 rounded border text-sm disabled:opacity-50"
-        >
-          Sonraki
-        </button>
+        <button onClick={() => fetchData(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Önceki</button>
+        <div className="text-sm text-gray-600 dark:text-gray-300">{page} / {lastPage}</div>
+        <button onClick={() => fetchData(Math.min(lastPage, page + 1))} disabled={page >= lastPage} className="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Sonraki</button>
       </div>
     </div>
   );

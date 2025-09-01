@@ -135,14 +135,13 @@ export default function SiparisOlustur() {
       };
 
       const res = await axios.post('/v1/siparisler', payload);
-
       toast.success('Sipariş başarıyla oluşturuldu!', { position: 'top-right' });
-      // backend'de biz 'data' => $siparis->id dönmüştük
+
       const yeniId = res?.data?.data;
       if (yeniId) {
-        navigate(`/siparisler/${yeniId}`);
+        // Başarı bandını sadece ilk gelişte göstermek için created=1 ekliyoruz
+        navigate(`/siparisler/${yeniId}?created=1`);
       } else {
-        // ya da müşterinin sipariş listesine dön
         navigate(`/musteriler/${musteriNumericId}/siparisler`);
       }
     } catch (error: any) {

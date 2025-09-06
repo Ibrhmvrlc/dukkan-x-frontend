@@ -8,6 +8,7 @@ type Row = {
   tarih: string;
   aciklama?: string | null;
   belge_no?: string | number | null;
+  kanal?: string | null;
   borc: number;
   alacak: number;
   bakiye: number; // sunucu: yalnızca onaylılar üstünden kümülatif
@@ -100,19 +101,19 @@ export default function Ekstre({ musteriId }: { musteriId: number }) {
       {/* Filtreler */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col">
-          <label className="text-xs text-gray-500 dark:text-gray-400">Başlangıç</label>
+          <label className="text-xs text-gray-500 dark:text-gray-300">Başlangıç</label>
           <input
             type="date"
-            className="px-2 py-1.5 rounded border bg-white dark:bg-transparent dark:border-white/10"
+            className="px-2 py-1.5 rounded border bg-white dark:bg-transparent dark:border-white/10 dark:text-gray-400"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-xs text-gray-500 dark:text-gray-400">Bitiş</label>
+          <label className="text-xs text-gray-500 dark:text-gray-300">Bitiş</label>
           <input
             type="date"
-            className="px-2 py-1.5 rounded border bg-white dark:bg-transparent dark:border-white/10"
+            className="px-2 py-1.5 rounded border bg-white dark:bg-transparent dark:border-white/10 dark:text-gray-400"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
           />
@@ -125,7 +126,7 @@ export default function Ekstre({ musteriId }: { musteriId: number }) {
       {/* Onay bekleyen bilgi çubuğu (listelenmez, sadece sayısı gösterilir) */}
       {pendingCount > 0 && (
         <div className="rounded-xl border border-amber-300/50 bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-200 px-4 py-3">
-          {pendingCount} adet <strong>onay bekleyen</strong> kayıt var. Bu kayıtlar belge numarası olmadığı için yani faturalandırılmadığı için ekstrede listelenmez.
+          {pendingCount} adet <strong>onay bekleyen</strong> kayıt var. Bu kayıtlar belge numarası olmadığı yani faturalandırılmadığı için ekstrede listelenmez.
         </div>
       )}
 
@@ -168,9 +169,9 @@ export default function Ekstre({ musteriId }: { musteriId: number }) {
               <tr><td colSpan={7} className="px-3 py-6 text-center text-gray-500">Kayıt bulunamadı.</td></tr>
             ) : (
               rows.map((r) => (
-                <tr key={`${r.tur}-${r.id}`} className="border-t dark:border-white/5">
+                <tr key={`${r.tur}-${r.id}`} className="border-t dark:border-white/5 dark:text-gray-300">
                   <td className="px-3 py-2 whitespace-nowrap">{formatDate(r.tarih)}</td>
-                  <td className={`px-3 py-2 font-medium ${colorByType(r.tur)}`}>{r.tur === "siparis" ? "Sipariş" : "Tahsilat"}</td>
+                  <td className={`px-3 py-2 font-medium ${colorByType(r.tur)}`}>{r.tur === "siparis" ? "Sipariş" : "Tahsilat"}  / {r.kanal ?? ""}</td>
                   <td className="px-3 py-2">{r.belge_no}</td>
                   <td className="px-3 py-2">{r.aciklama ?? "-"}</td>
                   <td className="px-3 py-2 text-right">{r.borc ? money(r.borc) : "-"}</td>
@@ -185,9 +186,9 @@ export default function Ekstre({ musteriId }: { musteriId: number }) {
 
       {/* Sayfalama */}
       <div className="flex items-center justify-end gap-2">
-        <button onClick={() => fetchData(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Önceki</button>
+        <button onClick={() => fetchData(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 dark:text-white">Önceki</button>
         <div className="text-sm text-gray-600 dark:text-gray-300">{page} / {lastPage}</div>
-        <button onClick={() => fetchData(Math.min(lastPage, page + 1))} disabled={page >= lastPage} className="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Sonraki</button>
+        <button onClick={() => fetchData(Math.min(lastPage, page + 1))} disabled={page >= lastPage} className="px-3 py-1.5 rounded border text-sm disabled:opacity-50 dark:text-white">Sonraki</button>
       </div>
     </div>
   );

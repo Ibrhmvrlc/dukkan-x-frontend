@@ -309,14 +309,6 @@ export default function MusteriEdit() {
           </TabsList>
         </div>
 
-
-
-
-
- 
-
-
-
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-b-xl p-6 rounded-xl">
           <TabsContent value="ozet">
             {/* GENEL BİLGİLER */}

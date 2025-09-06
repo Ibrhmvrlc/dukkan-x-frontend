@@ -132,7 +132,7 @@ export default function MusteriOzelFiyatListesi({ musteriId }: Props) {
 
   if (loading) {
     return (
-      <div className="p-4 rounded-lg border dark:border-white/10">Yükleniyor...</div>
+      <div className="p-4 rounded-lg border dark:border-white/10 dark:text-gray-500">Yükleniyor...</div>
     );
   }
 

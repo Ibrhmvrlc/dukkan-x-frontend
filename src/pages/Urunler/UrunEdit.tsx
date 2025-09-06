@@ -328,7 +328,6 @@ export default function UrunEdit() {
             )}
           </td>
         </tr>
-
       </tbody>
     </table>
 

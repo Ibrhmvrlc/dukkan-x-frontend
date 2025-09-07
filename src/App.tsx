@@ -102,7 +102,6 @@ export default function App() {
           <Route path="/urunler/:id" element={<UrunEdit />} />
           <Route path="/urunler/yeni" element={<YeniUrun />} />
           <Route path="/fiyat-guncelle" element={<UrunFiyatGuncelleme />} />
-
           {/* Tahsilat Modülü */}
           <Route path="/tahsilat-ekle" element={<TahsilatEklePage />} />
 

@@ -10,12 +10,12 @@ import {
   GridIcon,
   GroupIcon,
   HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
-  UserCircleIcon,
+  // ListIcon,
+  //PageIcon,
+  //PieChartIcon,
+  //PlugInIcon,
+  //TableIcon,
+  //UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
@@ -39,8 +39,8 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Müşteriler", path: "/musteriler", pro: false },
       { name: "Tedarikçiler", path: "/tedarikciler", pro: false },
-      { name: "Nakliyeciler", path: "/nakliyeciler", pro: false },
-      { name: "Bankalar", path: "/bankalar", pro: true },
+      //{ name: "Nakliyeciler", path: "/nakliyeciler", pro: false },
+      //{ name: "Bankalar", path: "/bankalar", pro: true },
     ],
   },
   {
@@ -56,21 +56,21 @@ const navItems: NavItem[] = [
     name: "Tahsilat Ekle",
     path: "/tahsilat-ekle",
   },
+  /*
   {
     name: "Ekstreler",
     icon: <ListIcon />,
     subItems: [{ name: "Borçlu Cari Hesaplar", path: "/borclu-hesaplar", pro: false }, { name: "Alacaklı Cari Hesaplar", path: "/alacakli-hesaplar", pro: false }],
   },
-  {
-    icon: <CalenderIcon />,
-    name: "Takvim",
-    path: "/calendar",
-  },
+  */
+  /*
   {
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
   },
+  */
+ /*
   {
     name: "Forms",
     icon: <ListIcon />,
@@ -89,9 +89,16 @@ const navItems: NavItem[] = [
       { name: "404 Error", path: "/error-404", pro: false },
     ],
   },
+  */
 ];
 
 const othersItems: NavItem[] = [
+  {
+    icon: <CalenderIcon />,
+    name: "Takvim",
+    path: "/calendar",
+  },
+  /*
   {
     icon: <PieChartIcon />,
     name: "Charts",
@@ -120,6 +127,7 @@ const othersItems: NavItem[] = [
       { name: "Sign Up", path: "/signup", pro: false },
     ],
   },
+  */
 ];
 
 const AppSidebar: React.FC = () => {
@@ -381,7 +389,7 @@ const AppSidebar: React.FC = () => {
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
+                  "İşlemler"
                 ) : (
                   <HorizontaLDots className="size-6" />
                 )}
@@ -397,7 +405,7 @@ const AppSidebar: React.FC = () => {
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
+                  "Diğer"
                 ) : (
                   <HorizontaLDots />
                 )}

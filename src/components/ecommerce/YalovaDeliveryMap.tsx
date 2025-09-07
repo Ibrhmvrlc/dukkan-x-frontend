@@ -1,9 +1,9 @@
+// YalovaDeliveryMap.tsx
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { latLngBounds, type LatLngExpression } from "leaflet";
 
-// Teslimat noktası tipi (adres/ilçe/il opsiyonel bırakıldı)
 export type DeliveryPoint = {
   id: number | string;
   baslik?: string;
@@ -23,13 +23,39 @@ function FitBounds({ points }: { points: DeliveryPoint[] }) {
       map.fitBounds(bounds.pad(0.25));
       map.setMaxBounds(bounds.pad(0.6));
     } else {
-      map.setView([40.6549, 29.2842], 10); // Yalova merkez
+      map.setView([40.6549, 29.2842], 10);
     }
   }, [points, map]);
   return null;
 }
 
-export default function YalovaDeliveryMap({ points }: { points: DeliveryPoint[] }) {
+// Container genişliği değişince haritayı tazele (opsiyonel ama iyi olur)
+function UseResizeInvalidate() {
+  const map = useMap();
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const container = map.getContainer();
+    ref.current = container as HTMLDivElement;
+    const ro = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    ro.observe(container);
+    // ilk mount’ta da küçük bir gecikmeyle tazele
+    setTimeout(() => map.invalidateSize(), 50);
+    return () => ro.disconnect();
+  }, [map]);
+
+  return null;
+}
+
+export default function YalovaDeliveryMap({
+  points,
+  className = "",
+}: {
+  points: DeliveryPoint[];
+  className?: string; // dışarıdan boyut sınıfı al
+}) {
   const yalovaCenter: LatLngExpression = [40.6549, 29.2842];
 
   const total = points.reduce((s, p) => s + p.shipments_count, 0);
@@ -44,13 +70,14 @@ export default function YalovaDeliveryMap({ points }: { points: DeliveryPoint[] 
       center={yalovaCenter}
       zoom={10}
       scrollWheelZoom={false}
-      className="h-[212px] w-[252px] 2xsm:w-[307px] xsm:w-[358px] md:w-[668px] lg:w-[634px] xl:w-[393px] 2xl:w-[554px] rounded-xl"
+      className={`w-full h-[280px] md:h-[360px] lg:h-[420px] rounded-xl ${className}`}
       style={{ outline: "none" }}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; OpenStreetMap katkıda bulunanlar"
       />
+      <UseResizeInvalidate />
       <FitBounds points={points} />
       {points.map((p) => {
         const title = p.baslik ?? p.ilce ?? p.il ?? "Nokta";

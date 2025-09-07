@@ -64,7 +64,35 @@ export default function EcommerceMetrics({
     };
   }, [externalData]);
 
-  if (loading || !data) return <div>Yükleniyor...</div>;
+  if (loading || !data) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+        {/* Customers skeleton */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 animate-pulse">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800"></div>
+          <div className="mt-5 flex items-end justify-between">
+            <div>
+              <span className="block h-4 w-20 rounded bg-gray-200 dark:bg-gray-700"></span>
+              <span className="mt-2 block h-6 w-16 rounded bg-gray-200 dark:bg-gray-700"></span>
+            </div>
+            <span className="h-6 w-20 rounded bg-gray-200 dark:bg-gray-700"></span>
+          </div>
+        </div>
+
+        {/* Orders skeleton */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 animate-pulse">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800"></div>
+          <div className="mt-5 flex items-end justify-between">
+            <div>
+              <span className="block h-4 w-20 rounded bg-gray-200 dark:bg-gray-700"></span>
+              <span className="mt-2 block h-6 w-16 rounded bg-gray-200 dark:bg-gray-700"></span>
+            </div>
+            <span className="h-6 w-20 rounded bg-gray-200 dark:bg-gray-700"></span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const custDiff = data.customers.current - data.customers.prev;
 

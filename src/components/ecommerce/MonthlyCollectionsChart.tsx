@@ -105,9 +105,14 @@ export default function MonthlyCollectionsChart() {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
       <div className="flex items-center justify-between">
+        {loading ? (
+          ''
+        ) : ( 
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
           Aylık Tahsilatlar (Son 12 Ay)
         </h3>
+         )
+        }
         <div className="relative inline-block">
           <button className="dropdown-toggle" onClick={() => setIsOpen((s) => !s)}>
             <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
@@ -130,13 +135,40 @@ export default function MonthlyCollectionsChart() {
       )}
 
       <div className="max-w-full overflow-x-auto custom-scrollbar">
-        <div className="-ml-5 min-w-[650px] pl-2 xl:min-w-full">
-          {loading ? (
-            <div className="h-[180px] animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
-          ) : (
-            <Chart options={options} series={series} type="bar" height={180} />
-          )}
+        {loading ? (
+        <div className="h-[180px] animate-pulse">
+          {/* barların gövdeleri */}
+          <div className="flex h-[150px] items-end gap-2">
+            {Array.from({ length: 13 }).map((_, i) => {
+              // 150px içinde değişken yükseklikler (grafik hissi için)
+              const heights = [40, 70, 55, 95, 60, 80, 50, 110, 65, 85, 58, 100, 75];
+              const h = heights[i % heights.length];
+              return (
+                <div key={i} className="flex-1 flex items-end justify-center">
+                  <div
+                    className="w-2/3 rounded-md bg-gray-200 dark:bg-gray-800"
+                    style={{ height: `${h}px` }}
+                    aria-hidden
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* x-ekseni etiket placeholder’ları */}
+          <div className="mt-2 flex justify-between px-1">
+            {Array.from({ length: 13 }).map((_, i) => (
+              <span
+                key={i}
+                className="h-3 w-5 rounded bg-gray-200 dark:bg-gray-800"
+                aria-hidden
+              />
+            ))}
+          </div>
         </div>
+      ) : (
+        <Chart options={options} series={series} type="bar" height={180} />
+      )}
       </div>
     </div>
   );

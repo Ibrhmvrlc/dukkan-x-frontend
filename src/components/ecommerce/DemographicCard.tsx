@@ -25,7 +25,7 @@ export default function DemographicCard() {
       const res = await axios.get<ApiResp>("/v1/dashboard/yalova-delivery-points");
       setPoints(res.data.points ?? []);
     } catch {
-      setErr("Canlı veri bulunamadı.");
+      setErr("Henüz aktif değildir!");
       setPoints([]); // boş dizi
     } finally {
       setLoading(false);
@@ -85,22 +85,16 @@ export default function DemographicCard() {
             >
               Yenile
             </DropdownItem>
-            <DropdownItem
-              onItemClick={() => setIsOpen(false)}
-              className="flex w-full rounded-lg text-left font-normal text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              Delete
-            </DropdownItem>
           </Dropdown>
         </div>
       </div>
 
       <div className="px-4 py-6 my-6 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 sm:px-6">
         {loading ? (
-          <div className="h-[212px] animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
+          <div className="h-[280px] md:h-[360px] lg:h-[420px] animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
         ) : (
-          <div className="-mx-4 -my-6 sm:-mx-6">
-            <YalovaDeliveryMap points={points} />
+          <div className="-mx-4 sm:-mx-6">
+            <YalovaDeliveryMap points={points} className="w-full" />
           </div>
         )}
       </div>

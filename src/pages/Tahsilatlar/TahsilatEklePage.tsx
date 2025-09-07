@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import CustomerSelect from "../../components/selects/CustomerSelect";
+import { toast } from "react-toastify";
 
 type Form = {
   musteri_id: number | null;
@@ -28,8 +29,14 @@ export default function TahsilatEklePage() {
 
   const submit = async () => {
     const t = Number(form.tutar);
-    if (!form.musteri_id) return alert("Müşteri seçin.");
-    if (!t || t <= 0) return alert("Geçerli bir tutar girin.");
+    if (!form.musteri_id) {
+      toast.error("Müşteri seçin.");   // ❌ alert yerine
+      return;
+    }
+    if (!t || t <= 0) {
+      toast.error("Geçerli bir tutar girin."); 
+      return;
+    }
 
     try {
       setSaving(true);
@@ -40,15 +47,16 @@ export default function TahsilatEklePage() {
         referans_no: form.referans_no || null,
         aciklama: form.aciklama || null,
       });
-      alert("Tahsilat eklendi.");
-      navigate(-1);
+      toast.success("Tahsilat eklendi."); 
+      navigate(`/musteriler/${form.musteri_id}/duzenle`);  // ✅ müşteri detayına yönlendir
     } catch (e: any) {
       console.error(e);
-      alert(e?.response?.data?.message || "Kayıt başarısız.");
+      toast.error(e?.response?.data?.message || "Kayıt başarısız.");
     } finally {
       setSaving(false);
     }
-  };
+};
+
 
   return (
     <div className="space-y-4">

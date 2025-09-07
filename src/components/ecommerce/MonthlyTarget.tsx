@@ -167,73 +167,116 @@ const badgeText =
           </div>
         </div>
 
-        <div className="relative">
-          <div className="max-h-[330px]" id="chartDarkStyle">
-            {loading ? (
-              <div className="h-[330px] animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
-            ) : (
-              <Chart options={options} series={series} type="radialBar" height={330} />
-            )}
+        {loading ? (
+          // Radial chart skeleton
+          <div className="h-[180px] flex items-center justify-center">
+            <div className="relative size-60 animate-pulse">
+              
+              {/* dolu kısım temsili yay */}
+              <div className="absolute inset-0">
+                <div className="absolute left-1/2 top-1/2 h-1 w-24 -translate-x-1/2 -translate-y-1/2 rounded bg-gray-200 dark:bg-gray-800" />
+                <div className="absolute left-1/2 top-1/2 h-1 w-28 -translate-x-1/2 -translate-y-1/2 rotate-30 rounded bg-gray-200 dark:bg-gray-800" />
+                <div className="absolute left-1/2 top-1/2 h-1 w-16 -translate-x-1/2 -translate-y-1/2 -rotate-25 rounded bg-gray-200 dark:bg-gray-800" />
+              </div>
+              {/* yüzde metni placeholder */}
+              <div className="absolute left-1/2 top-1/2 h-8 w-24 -translate-x-1/2 -translate-y-1/2 rounded bg-gray-200 dark:bg-gray-800" />
+            </div>
           </div>
-        </div>
+        ) : (
+          <Chart options={options} series={series} type="radialBar" height={330} />
+        )}
 
         {/* Açıklama + rozet (alt alta, ortalanmış) */}
         <div className="mx-auto mt-5 w-full max-w-[420px] flex flex-col items-center">
-          <p className="text-center text-sm text-gray-500 sm:text-base">
-            Bu ayki tahsilat:{" "}
-            <span className="font-medium text-gray-700 dark:text-gray-300">
-              {data ? fmtCompact(data.collected_this_month) : "—" } ₺
-            </span>
-          </p>
+          {loading ? (
+            <>
+              <div className="h-5 w-56 rounded bg-gray-200 dark:bg-gray-800 animate-pulse" />
+              <div className="mt-2 h-6 w-40 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
+            </>
+          ) : (
+            <>
+              <p className="text-center text-sm text-gray-500 sm:text-base">
+                Bu ayki tahsilat:{" "}
+                <span className="font-medium text-gray-700 dark:text-gray-300">
+                  {data ? fmtCompact(data.collected_this_month) : "—"} ₺
+                </span>
+              </p>
 
-          {/* Rozet: Geçen aya göre değişim (küçük font, arka plan & yazı rengi dinamik) */}
-          <span
-            className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs ${badgeBg} ${badgeText}`}
-          >
-            <span className="block text-[10px] sm:text-[11px]">
-              {monthlyDeltaPct > 0
-                ? `Geçen aya göre +${monthlyDeltaPct.toFixed(1)}%`
-                : monthlyDeltaPct < 0
-                ? `Geçen aya göre -${Math.abs(monthlyDeltaPct).toFixed(1)}%`
-                : "Geçen aya göre değişim yok"}
-            </span>
-          </span>
+              <span
+                className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs ${badgeBg} ${badgeText}`}
+              >
+                <span className="block text-[10px] sm:text-[11px]">
+                  {monthlyDeltaPct > 0
+                    ? `Geçen aya göre +${monthlyDeltaPct.toFixed(1)}%`
+                    : monthlyDeltaPct < 0
+                    ? `Geçen aya göre -${Math.abs(monthlyDeltaPct).toFixed(1)}%`
+                    : "Geçen aya göre değişim yok"}
+                </span>
+              </span>
+            </>
+          )}
         </div>
       </div>
 
       {/* Alt 3 KPI: Satış (Toplam) / Tahsilat (Toplam) / Aylık Tahsilat */}
       <div className="flex items-center justify-center gap-5 px-6 py-3.5 sm:gap-8 sm:py-5">
-        <div className="text-center">
-          <p className="mb-1 text-theme-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-            Satış (Toplam)
-          </p>
-          <p className="text-center text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg">
-            {data ? fmtCompact(data.total_invoiced_all) : "—"} ₺
-          </p>
-        </div>
+        {loading ? (
+          <>
+            <div className="text-center animate-pulse">
+              <p className="mb-1 h-4 w-24 mx-auto rounded bg-gray-200 dark:bg-gray-800" />
+              <p className="mx-auto h-5 w-28 rounded bg-gray-200 dark:bg-gray-800" />
+            </div>
 
-        <div className="h-7 w-px bg-gray-200 dark:bg-gray-800" />
+            <div className="h-7 w-px bg-gray-200 dark:bg-gray-800" />
 
-        <div className="text-center">
-          <p className="mb-1 text-theme-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-            Tahsilat (Toplam)
-          </p>
-          <p className="text-center text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg">
-            {data ? fmtCompact(data.total_collected_all) : "—"} ₺
-          </p>
-        </div>
+            <div className="text-center animate-pulse">
+              <p className="mb-1 h-4 w-28 mx-auto rounded bg-gray-200 dark:bg-gray-800" />
+              <p className="mx-auto h-5 w-24 rounded bg-gray-200 dark:bg-gray-800" />
+            </div>
 
-        <div className="h-7 w-px bg-gray-200 dark:bg-gray-800" />
+            <div className="h-7 w-px bg-gray-200 dark:bg-gray-800" />
 
-        <div className="text-center">
-          <p className="mb-1 text-theme-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-            Aylık Tahsilat
-          </p>
-          <p className="text-center text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg">
-            {data ? fmtCompact(data.collected_this_month) : "—"} ₺
-          </p>
-        </div>
+            <div className="text-center animate-pulse">
+              <p className="mb-1 h-4 w-24 mx-auto rounded bg-gray-200 dark:bg-gray-800" />
+              <p className="mx-auto h-5 w-28 rounded bg-gray-200 dark:bg-gray-800" />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-center">
+              <p className="mb-1 text-theme-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+                Satış (Toplam)
+              </p>
+              <p className="text-center text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg">
+                {data ? fmtCompact(data.total_invoiced_all) : "—"} ₺
+              </p>
+            </div>
+
+            <div className="h-7 w-px bg-gray-200 dark:bg-gray-800" />
+
+            <div className="text-center">
+              <p className="mb-1 text-theme-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+                Tahsilat (Toplam)
+              </p>
+              <p className="text-center text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg">
+                {data ? fmtCompact(data.total_collected_all) : "—"} ₺
+              </p>
+            </div>
+
+            <div className="h-7 w-px bg-gray-200 dark:bg-gray-800" />
+
+            <div className="text-center">
+              <p className="mb-1 text-theme-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+                Aylık Tahsilat
+              </p>
+              <p className="text-center text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg">
+                {data ? fmtCompact(data.collected_this_month) : "—"} ₺
+              </p>
+            </div>
+          </>
+        )}
       </div>
+
 
       {err && (
         <div className="mx-6 mb-4 rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-2 text-sm text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-200">

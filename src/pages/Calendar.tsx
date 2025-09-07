@@ -8,6 +8,7 @@ import { Modal } from "../components/ui/modal";
 import { useModal } from "../hooks/useModal";
 import PageMeta from "../components/common/PageMeta";
 import axios from "../api/axios";
+import trLocale from "@fullcalendar/core/locales/tr";
 
 type Level = "Danger" | "Success" | "Primary" | "Warning";
 interface AppCalendarEvent {
@@ -178,6 +179,16 @@ const Calendar: React.FC = () => {
               center: "title",
               right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
+            // ⬇️ Türkçe
+            locales={[trLocale]}
+            locale="tr"
+            // ⬇️ 24 saat ve başlık/başlıkçıklar daha temiz
+            firstDay={1}
+            eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
+            slotLabelFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
+            dayHeaderFormat={{ weekday: "long" }}      // “Pazartesi, Salı…” gibi
+            titleFormat={{ year: "numeric", month: "long" }} // “Eylül 2025”
+            // ⬆️
             events={loadEvents}
             selectable
             select={handleDateSelect}
@@ -188,7 +199,7 @@ const Calendar: React.FC = () => {
             eventResize={onEventResize}
             customButtons={{
               addEventButton: {
-                text: "Add Event +",
+                text: "Plan Oluştur +",
                 click: () => {
                   resetModalFields();
                   openModal();
@@ -202,16 +213,16 @@ const Calendar: React.FC = () => {
           <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
             <div>
               <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
-                {selectedEvent ? "Edit Event" : "Add Event"}
+                {selectedEvent ? "Planı Düzenle" : "Plan Oluştur"}
               </h5>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Plan your next big moment: schedule or edit an event to stay on track
+                Planladığınız sevkiyatı ya da siparişi girebilirsiniz.
               </p>
             </div>
 
             <div className="mt-8">
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                Event Title
+                Başlık
               </label>
               <input
                 id="event-title"
@@ -223,7 +234,7 @@ const Calendar: React.FC = () => {
 
               <div className="mt-6">
                 <label className="block mb-4 text-sm font-medium text-gray-700 dark:text-gray-400">
-                  Event Color
+                  Önem Durumu
                 </label>
                 <div className="flex flex-wrap items-center gap-4 sm:gap-5">
                   {(Object.keys(calendarsEvents) as Level[]).map((key) => (
@@ -244,7 +255,7 @@ const Calendar: React.FC = () => {
 
               <div className="mt-6">
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  Enter Start Date
+                  Başlangıç Tarihi
                 </label>
                 <input
                   id="event-start-date"
@@ -257,7 +268,7 @@ const Calendar: React.FC = () => {
 
               <div className="mt-6">
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  Enter End Date
+                  Bitiş Tarihi
                 </label>
                 <input
                   id="event-end-date"
@@ -276,7 +287,7 @@ const Calendar: React.FC = () => {
                   type="button"
                   className="flex w-full justify-center rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-700 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-white/[0.03] sm:w-auto"
                 >
-                  Delete
+                  Sil
                 </button>
               )}
               <button
@@ -284,14 +295,14 @@ const Calendar: React.FC = () => {
                 type="button"
                 className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
               >
-                Close
+                Kapat
               </button>
               <button
                 onClick={handleAddOrUpdateEvent}
                 type="button"
                 className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
               >
-                {selectedEvent ? "Update Changes" : "Add Event"}
+                {selectedEvent ? "Değişiklikleri Onayla" : "Plan Oluştur"}
               </button>
             </div>
           </div>

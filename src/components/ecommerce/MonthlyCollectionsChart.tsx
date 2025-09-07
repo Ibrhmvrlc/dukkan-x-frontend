@@ -1,4 +1,3 @@
-// src/components/ecommerce/MonthlySalesChart.tsx
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { Dropdown } from "../ui/dropdown/Dropdown";
@@ -7,11 +6,11 @@ import { MoreDotIcon } from "../../icons";
 import { useEffect, useMemo, useState } from "react";
 import axios from "../../api/axios";
 
-type MonthlySalesResp = {
-  from: string;          // "2024-10-01"
-  to: string;            // "2025-09-30"
-  labels: string[];      // ["Eki","Kas",...,"Eyl"] (12 öğe)
-  totals: number[];      // [12 öğe] TL
+type MonthlyCollectionsResp = {
+  from: string;     // "YYYY-MM-DD" (geçen yıl aynı ayın ilk günü)
+  to: string;       // "YYYY-MM-DD" (bu ayın son günü)
+  labels: string[]; // 13 öğe, ["Eyl","Eki",...,"Eyl"] gibi
+  totals: number[]; // 13 öğe, TL bazında tahsilat toplamları
 };
 
 const fmtTLShort = (n: number) => {
@@ -31,9 +30,22 @@ const fmtTLShort = (n: number) => {
 const fmtTLFull = (n: number) =>
   (n ?? 0).toLocaleString("tr-TR", { style: "currency", currency: "TRY" });
 
-export default function MonthlySalesChart() {
+// Sadece mock için: son 13 ay TR kısa ay adlarını üretir
+function last13MonthLabelsTR(): string[] {
+  const now = new Date();
+  const arr: string[] = [];
+  for (let i = 12; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    // "Eyl.", "Eki." vb. gelebilir; noktayı kaldır, ilk harfi büyük tut
+    const raw = d.toLocaleDateString("tr-TR", { month: "short" });
+    arr.push(raw.replace(".", ""));
+  }
+  return arr;
+}
+
+export default function MonthlyCollectionsChart() {
   const [isOpen, setIsOpen] = useState(false);
-  const [data, setData] = useState<MonthlySalesResp | null>(null);
+  const [data, setData] = useState<MonthlyCollectionsResp | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -41,19 +53,17 @@ export default function MonthlySalesChart() {
     try {
       setErr(null);
       setLoading(true);
-      // Rolling 12 ay verisi
-      const res = await axios.get<MonthlySalesResp>("/v1/dashboard/monthly-sales");
-      // emniyet: 12 eleman garanti
+      const res = await axios.get<MonthlyCollectionsResp>("/v1/dashboard/monthly-collections");
       const labels = Array.from({ length: 13 }, (_, i) => res.data.labels?.[i] ?? "");
       const totals = Array.from({ length: 13 }, (_, i) => res.data.totals?.[i] ?? 0);
       setData({ from: res.data.from, to: res.data.to, labels, totals });
     } catch {
       setErr("Canlı veri bulunamadı.");
       setData({
-        from: "2024-10-01",
-        to: "2025-09-30",
-        labels: ["Eki","Kas","Ara","Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl"],
-        totals: [0,0,0,0,0,0,0,0,0,0,0,0],
+        from: "",
+        to: "",
+        labels: last13MonthLabelsTR(),
+        totals: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       });
     } finally {
       setLoading(false);
@@ -65,7 +75,7 @@ export default function MonthlySalesChart() {
   }, []);
 
   const options: ApexOptions = useMemo(() => ({
-    colors: ["#465FFF"],
+    colors: ["#10B981"],
     chart: { fontFamily: "Outfit, sans-serif", type: "bar", height: 180, toolbar: { show: false } },
     plotOptions: {
       bar: { horizontal: false, columnWidth: "39%", borderRadius: 5, borderRadiusApplication: "end" },
@@ -73,7 +83,7 @@ export default function MonthlySalesChart() {
     dataLabels: { enabled: false },
     stroke: { show: true, width: 4, colors: ["transparent"] },
     xaxis: {
-      categories: data?.labels ?? Array(12).fill(""),
+      categories: data?.labels ?? Array(13).fill(""),
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
@@ -88,15 +98,15 @@ export default function MonthlySalesChart() {
   }), [data?.labels]);
 
   const series = useMemo(() => [{
-    name: "Satış (₺)",
-    data: data?.totals ?? Array(12).fill(0),
+    name: "Tahsilat (₺)",
+    data: data?.totals ?? Array(13).fill(0),
   }], [data?.totals]);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-          Aylık Satışlar (Son 12 Ay)
+          Aylık Tahsilatlar (Son 12 Ay)
         </h3>
         <div className="relative inline-block">
           <button className="dropdown-toggle" onClick={() => setIsOpen((s) => !s)}>

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import axios from "../../api/axios";
 import { Modal } from "../../components/ui/modal";
+import { toast } from "react-toastify";
+
 
 interface SiparisListesiProps {
   musteriId: number;
@@ -130,6 +132,8 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [editing, setEditing] = useState<Siparis | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
 
   // select verileri
   const [yetkiliList, setYetkiliList] = useState<YetkiliOpt[]>([]);
@@ -166,6 +170,38 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
       mounted = false;
     };
   }, [musteriId, page, perPage]);
+
+  const deleteSiparis = async (id: number) => {
+    const ok = window.confirm(`#${id} numaralı siparişi silmek istiyor musunuz?`);
+    if (!ok) return;
+
+    try {
+      setDeletingId(id);
+      await axios.delete(`/v1/siparisler/${id}`);
+
+      // Başarı: listedeki kaydı çıkar + metadata’yı güncelle
+      setSiparisler(prev => prev.filter(s => s.id !== id));
+      setMeta(prev => ({
+        ...prev,
+        total: Math.max(0, (prev.total ?? 0) - 1),
+        to: Math.max(0, (prev.to ?? 0) - 1),
+        // gerekirse sayfa bittiğinde bir önceki sayfaya çekebilirsiniz:
+        // current_page: (prev.to === prev.from) ? Math.max(1, prev.current_page - 1) : prev.current_page,
+      }));
+
+      toast.success("Sipariş silindi.");
+    } catch (err: any) {
+      console.error("Silme hatası:", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Sipariş silinirken bir hata oluştu.";
+      toast.error(msg);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
 
   // Modal açıldığında yetkili & adresleri tek endpointten çek
   useEffect(() => {
@@ -355,7 +391,15 @@ export default function SiparisListesi({ musteriId }: SiparisListesiProps) {
                   <button className="px-2 py-1 text-xs rounded bg-blue-500 text-white hover:bg-blue-600" onClick={() => openEdit(siparis)}>
                     Düzenle
                   </button>
-                  <button className="px-2 py-1 text-xs rounded bg-red-500 text-white hover:bg-red-600">Sil</button>
+                  <button
+                    className="px-2 py-1 text-xs rounded bg-red-500 text-white hover:bg-red-600 disabled:opacity-60"
+                    onClick={() => deleteSiparis(siparis.id)}
+                    disabled={deletingId === siparis.id}
+                    title="Soft delete ile sil"
+                  >
+                    {deletingId === siparis.id ? "Siliniyor..." : "Sil"}
+                  </button>
+
                 </div>
               </div>
 

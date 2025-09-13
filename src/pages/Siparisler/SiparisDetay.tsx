@@ -45,7 +45,8 @@ export default function SiparisDetay() {
   const [siparis, setSiparis] = useState<Siparis | null>(null);
 
   const showSuccess = searchParams.get('created') === '1';
-
+  void showSuccess;
+  
   useEffect(() => {
     let mounted = true;
     setLoading(true);

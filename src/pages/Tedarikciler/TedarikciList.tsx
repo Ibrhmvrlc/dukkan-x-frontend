@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import axios from '../../api/axios';
 import { Link } from 'react-router-dom';
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
-import Button from "../../components/ui/button/Button";
-import { Mail, MessageCircle } from "lucide-react";
+// import Button from "../../components/ui/button/Button";
+// import { Mail, MessageCircle } from "lucide-react";
 
 interface Tedarikci {
   id: number;

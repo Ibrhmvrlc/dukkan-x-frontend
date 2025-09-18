@@ -1,28 +1,21 @@
 import axios from "axios";
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/+$/, ""); // sondaki /'ları temizle
+
 const instance = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: `${API_BASE}/api`,
+  withCredentials: false, // gerekiyorsa kalsın
 });
 
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  console.log("[Axios Request] Token from localStorage:", token);
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    console.warn("[Axios Request] No token found in localStorage");
-  }
-
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   config.headers.Accept = "application/json";
-
-  console.log("[Axios Request] Final request config headers:", config.headers);
   return config;
 });
 
-// ✅ Response interceptor (refresh token support)
 instance.interceptors.response.use(
-  (response) => response,
+  (res) => res,
   async (error) => {
     const originalRequest = error.config;
 
@@ -35,28 +28,20 @@ instance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshResponse = await axios.post("http://localhost:8000/api/refresh", null, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            Accept: "application/json",
-          },
-        });
-
-        const newToken = refreshResponse.data.access_token; // ✅ doğru key
+        // refresh URL’yi de aynı base’ten üret
+        const refresh = await instance.post("/refresh", null);
+        const newToken = refresh.data.access_token;
         localStorage.setItem("token", newToken);
-
-        // Güncellenmiş token'ı eski isteğe ekle
         originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-
-        return instance(originalRequest); // ✅ isteği yeniden dene
-      } catch (refreshError) {
+        return instance(originalRequest);
+      } catch (e) {
         localStorage.removeItem("token");
         window.location.href = "/signin";
-        return Promise.reject(refreshError);
+        throw e;
       }
     }
 
-    return Promise.reject(error);
+    throw error;
   }
 );
 

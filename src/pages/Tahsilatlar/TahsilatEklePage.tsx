@@ -3,6 +3,7 @@ import axios from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import CustomerSelect from "../../components/selects/CustomerSelect";
 import { toast } from "react-toastify";
+import LoadingButton from "../../components/ui/button/LoadingButton";
 
 type Form = {
   musteri_id: number | null;
@@ -155,13 +156,9 @@ export default function TahsilatEklePage() {
           >
             İptal
           </button>
-          <button
-            disabled={saving}
-            onClick={submit}
-            className="px-5 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50"
-          >
+           <LoadingButton full onClick={submit} disabled={saving}>
             {saving ? "Kaydediliyor…" : "Kaydet"}
-          </button>
+           </LoadingButton>
         </div>
       </div>
     </div>

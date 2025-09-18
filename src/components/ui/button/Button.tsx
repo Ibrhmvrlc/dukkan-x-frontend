@@ -1,14 +1,16 @@
 import { ReactNode } from "react";
 
 interface ButtonProps {
-  children: ReactNode; // Button text or content
-  size?: "sm" | "md"; // Button size
-  variant?: "primary" | "outline"; // Button variant
-  startIcon?: ReactNode; // Icon before the text
-  endIcon?: ReactNode; // Icon after the text
-  onClick?: () => void; // Click handler
-  disabled?: boolean; // Disabled state
-  className?: string; // Disabled state
+  children: ReactNode;
+  size?: "sm" | "md";
+  variant?: "primary" | "outline";
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  onClick?: () => void | Promise<any>;
+  disabled?: boolean;
+  className?: string;
+  loading?: boolean;
+  type?: "button" | "submit" | "reset"; // 👈 eklendi
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -20,14 +22,14 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   className = "",
   disabled = false,
+  loading = false,
+  type = "button", // 👈 default
 }) => {
-  // Size Classes
   const sizeClasses = {
     sm: "px-4 py-3 text-sm",
     md: "px-5 py-3.5 text-sm",
   };
 
-  // Variant Classes
   const variantClasses = {
     primary:
       "bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300",
@@ -37,17 +39,25 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
+      type={type} // 👈 KRİTİK
       className={`inline-flex items-center justify-center gap-2 rounded-lg transition ${className} ${
         sizeClasses[size]
       } ${variantClasses[variant]} ${
-        disabled ? "cursor-not-allowed opacity-50" : ""
+        disabled || loading ? "cursor-not-allowed opacity-50" : ""
       }`}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
+      aria-busy={loading ? "true" : "false"}
     >
-      {startIcon && <span className="flex items-center">{startIcon}</span>}
+      {loading && (
+        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.25" />
+          <path d="M22 12a10 10 0 0 1-10 10" fill="currentColor" />
+        </svg>
+      )}
+      {startIcon && !loading && <span className="flex items-center">{startIcon}</span>}
       {children}
-      {endIcon && <span className="flex items-center">{endIcon}</span>}
+      {endIcon && !loading && <span className="flex items-center">{endIcon}</span>}
     </button>
   );
 };

@@ -6,10 +6,12 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import axios from "../../api/axios";
+import Button from "../ui/button/Button";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [submitting, setSubmitting] = useState(false); // 👈 eklendi
   const [form, setForm] = useState({
     fname: "",
     lname: "",
@@ -21,6 +23,7 @@ export default function SignUpForm() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setSubmitting(true);               // 👈 loading başlat
       const res = await axios.post('/register', {
         name: `${form.fname} ${form.lname}`,
         email: form.email,
@@ -31,6 +34,8 @@ export default function SignUpForm() {
       navigate('/');
     } catch (err: any) {
       alert("Kayıt başarısız: " + JSON.stringify(err.response?.data));
+    } finally {
+      setSubmitting(false);              // 👈 loading kapat
     }
   };
 
@@ -178,12 +183,15 @@ export default function SignUpForm() {
                 </div>
 
                 <div>
-                  <button
-                    type="submit"
-                    className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                   <Button
+                    className="w-full"
+                    size="sm"
+                    type="submit"          // 👈 kritik
+                    loading={submitting}   // 👈 spinner + disable
+                    disabled={submitting}  // (opsiyonel, loading zaten disable ediyor)
                   >
                     Sign Up
-                  </button>
+                  </Button>
                 </div>
 
                 <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start mt-5">

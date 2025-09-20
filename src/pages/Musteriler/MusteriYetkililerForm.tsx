@@ -45,6 +45,7 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
     pozisyon: '',
     musteri_id: props.musteriId
   });
+  const [submitting, setSubmitting] = useState(false); // 👈 eklendi
 
   // props.form değiştiğinde internalForm'u güncelle (uncontrolled modda)
   useEffect(() => {
@@ -81,6 +82,7 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
+      setSubmitting(true);               // 👈 loading başlat
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
 
       if (internalForm.id) {
@@ -94,6 +96,8 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
       !props.controlled && props.onSuccess?.();
     } catch (err: any) {
       console.error('Kayıt hatası:', err.response?.data || err.message);
+    }finally {
+      setSubmitting(false);              // 👈 loading kapat
     }
   };
 
@@ -132,8 +136,15 @@ export default function MusteriYetkililerForm(props: MusteriYetkililerFormProps)
 
         {!props.controlled && (
           <div className="flex justify-end">
-            <Button size="md" variant="primary">
-              {'Kaydet'}
+             <Button
+                className="w-full"
+                variant="primary"
+                size="sm"
+                type="submit"          // 👈 kritik
+                loading={submitting}   // 👈 spinner + disable
+                disabled={submitting}  // (opsiyonel, loading zaten disable ediyor)
+              >
+                {'Kaydet'}
             </Button>
           </div>
         )}

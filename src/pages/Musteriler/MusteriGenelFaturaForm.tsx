@@ -53,6 +53,8 @@ export default function MusteriGenelFaturaForm({
     vergi_no: '',
     vergi_dairesi: '',
   });
+  const [submitting, setSubmitting] = useState(false); // 👈 eklendi
+
 
   useEffect(() => {
     if (musteri) {
@@ -86,6 +88,7 @@ export default function MusteriGenelFaturaForm({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
+      setSubmitting(true);               // 👈 loading başlat
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
       if (musteri) {
         await axios.put(`/v1/musteriler/${musteri.id}`, internalForm, config);
@@ -95,6 +98,8 @@ export default function MusteriGenelFaturaForm({
       onSuccess?.();
     } catch (err: any) {
       console.error('Kayıt hatası:', err.response?.data || err.message);
+    } finally {
+      setSubmitting(false);              // 👈 loading kapat
     }
   };
 
@@ -135,8 +140,15 @@ export default function MusteriGenelFaturaForm({
 
         {!controlled && (
           <div className="flex justify-end">
-            <Button size="md" variant="primary">
-              {'Kaydet'}
+            <Button
+                className="w-full"
+                variant="primary"
+                size="sm"
+                type="submit"          // 👈 kritik
+                loading={submitting}   // 👈 spinner + disable
+                disabled={submitting}  // (opsiyonel, loading zaten disable ediyor)
+              >
+                {'Kaydet'}
             </Button>
           </div>
         )}

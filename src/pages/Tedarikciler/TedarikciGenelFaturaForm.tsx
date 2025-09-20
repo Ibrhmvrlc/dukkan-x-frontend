@@ -45,6 +45,7 @@ export default function TedarikciGenelFaturaForm({
     vergi_no: '',
     vergi_dairesi: ''
   });
+  const [submitting, setSubmitting] = useState(false); // 👈 eklendi
 
   useEffect(() => {
     if (tedarikci) {
@@ -74,6 +75,7 @@ export default function TedarikciGenelFaturaForm({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
+      setSubmitting(true);           // loading başlat
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
       if (tedarikci && tedarikci.id) {
         await axios.put(`/v1/tedarikciler/${tedarikci.id}`, internalForm, config);
@@ -83,6 +85,8 @@ export default function TedarikciGenelFaturaForm({
       onSuccess?.();
     } catch (err: any) {
       console.error('Kayıt hatası:', err.response?.data || err.message);
+    }finally {
+      setSubmitting(false);          // loading kapat
     }
   };
 
@@ -114,8 +118,14 @@ export default function TedarikciGenelFaturaForm({
         </div>
         {!controlled && (
           <div className="flex justify-end mt-4">
-            <Button size="md" variant="primary">
-              Kaydet
+            <Button
+                variant="primary"
+                size="sm"
+                type="submit"          // 👈 kritik
+                loading={submitting}   // 👈 spinner + disable
+                disabled={submitting}  // (opsiyonel, loading zaten disable ediyor)
+              >
+                {'Kaydet'}
             </Button>
           </div>
         )}

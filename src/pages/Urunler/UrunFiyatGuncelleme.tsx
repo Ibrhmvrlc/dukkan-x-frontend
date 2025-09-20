@@ -31,13 +31,13 @@ export default function FiyatGuncellemeSayfasi() {
   const navigate = useNavigate();
 
   // Güvenlik
- // const [userRoles, setUserRoles] = useState<string[]>([]);
   const [canAccess, setCanAccess] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
   const [unlocked, setUnlocked] = useState<boolean>(false);
+  const [unlocking, setUnlocking] = useState<boolean>(false);
 
   const ALLOWED_ROLES = ["admin", "yönetici", "yonetici", "müdür", "mudur", "owner"];
-  const REDIRECT_PATH = "/"; // şifre girmezse gideceği sayfa (dilediğin rota)
+  const REDIRECT_PATH = "/";
 
   // Sayfa state
   const [activeTab, setActiveTab] = useState("toplu");
@@ -49,13 +49,16 @@ export default function FiyatGuncellemeSayfasi() {
   const [guncellenenSatisFiyatlari, setGuncellenenSatisFiyatlari] = useState<Record<number, string>>({});
   const [guncellenenTedarikFiyatlari, setGuncellenenTedarikFiyatlari] = useState<Record<number, string>>({});
 
-  /* 1) Rolü çek – her mount'ta parola tekrar istenecek (cache yok) */
+  // Loading’ler
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [rowLoading, setRowLoading] = useState<Record<number, boolean>>({});
+
+  /* 1) Rolü çek – her mount'ta parola tekrar istenecek */
   useEffect(() => {
     (async () => {
       try {
         const me = await axios.get("/me");
         const roles: string[] = me.data?.roles ?? [];
-        
         setCanAccess(roles.some((r) => ALLOWED_ROLES.includes((r || "").toLowerCase())));
       } catch {
         setCanAccess(false);
@@ -66,9 +69,9 @@ export default function FiyatGuncellemeSayfasi() {
   /* 2) Ürünleri sadece kilit açıldıktan sonra çek */
   useEffect(() => {
     if (!unlocked || !canAccess) return;
-    axios
-      .get("/v1/urunler")
-      .then((res) => {
+    (async () => {
+      try {
+        const res = await axios.get("/v1/urunler");
         const gelen = res.data?.data;
         if (Array.isArray(gelen)) {
           const normalized = gelen.map((u: any) => ({
@@ -81,81 +84,95 @@ export default function FiyatGuncellemeSayfasi() {
           console.error("❌ /v1/urunler beklenen formatta değil:", res.data);
           setUrunler([]);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("❌ API isteği başarısız oldu:", err);
         setUrunler([]);
-      });
+      }
+    })();
   }, [unlocked, canAccess]);
 
   /* 3) Parola doğrulama – her gelişte zorunlu */
   const handleUnlock = async () => {
+    if (unlocking) return;
     try {
       if (!password.trim()) return toast.error("Lütfen parolanızı girin.");
+      setUnlocking(true);
       await axios.post("/v1/reauth", { password });
       setUnlocked(true);
       setPassword("");
       toast.success("Doğrulandı.");
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Parola doğrulanamadı.");
+    } finally {
+      setUnlocking(false);
     }
   };
 
   /* Toplu güncelleme */
-  const handleTopluGuncelle = () => {
-    axios
-      .post("/v1/urunler/toplu-guncelle", { oran, markalar: secilenMarkalar, hedef })
-      .then(() => {
-        const factor = 1 + oran / 100;
-        setUrunler((prev) =>
-          prev.map((u) => {
-            const etkilenir = secilenMarkalar.length === 0 || secilenMarkalar.includes(u.marka);
-            if (!etkilenir) return u;
-            const next = { ...u };
-            if (hedef === "satis" || hedef === "ikisi") next.satis_fiyati = +(toNum(next.satis_fiyati) * factor).toFixed(2);
-            if (hedef === "tedarik" || hedef === "ikisi") next.tedarik_fiyati = +(toNum(next.tedarik_fiyati) * factor).toFixed(2);
-            return next;
-          })
-        );
-        toast.success("Toplu güncelleme yapıldı");
-      })
-      .catch((err) => {
-        console.error("Toplu güncelleme hatası:", err);
-        toast.error("Toplu güncelleme başarısız oldu.");
-      });
+  const handleTopluGuncelle = async () => {
+    if (bulkLoading) return;
+    try {
+      setBulkLoading(true);
+      await axios.post("/v1/urunler/toplu-guncelle", { oran, markalar: secilenMarkalar, hedef });
+
+      const factor = 1 + oran / 100;
+      setUrunler((prev) =>
+        prev.map((u) => {
+          const etkilenir = secilenMarkalar.length === 0 || secilenMarkalar.includes(u.marka);
+          if (!etkilenir) return u;
+          const next = { ...u };
+          if (hedef === "satis" || hedef === "ikisi")
+            next.satis_fiyati = +(toNum(next.satis_fiyati) * factor).toFixed(2);
+          if (hedef === "tedarik" || hedef === "ikisi")
+            next.tedarik_fiyati = +(toNum(next.tedarik_fiyati) * factor).toFixed(2);
+          return next;
+        })
+      );
+      toast.success("Toplu güncelleme yapıldı");
+    } catch (err) {
+      console.error("Toplu güncelleme hatası:", err);
+      toast.error("Toplu güncelleme başarısız oldu.");
+    } finally {
+      setBulkLoading(false);
+    }
   };
 
   /* Tekil güncelleme */
-  const handleTekilGuncelle = (urunId: number) => {
+  const handleTekilGuncelle = async (urunId: number) => {
+    if (rowLoading[urunId]) return; // çift tıklama koruması
+
     const payload: Record<string, number> = {};
     const satisStr = guncellenenSatisFiyatlari[urunId];
     const tedarikStr = guncellenenTedarikFiyatlari[urunId];
     const yeniSatis = parseTRY(satisStr);
     const yeniTedarik = parseTRY(tedarikStr);
+
     if (Number.isFinite(yeniSatis)) payload.satis_fiyati = Number(yeniSatis.toFixed(2));
     if (Number.isFinite(yeniTedarik)) payload.tedarik_fiyati = Number(yeniTedarik.toFixed(2));
     if (Object.keys(payload).length === 0) return toast.error("En az bir alan doldurun (Satış/Tedarik).");
 
-    axios
-      .put(`/v1/urunler/${urunId}/fiyat`, payload)
-      .then(() => {
-        setUrunler((prev) => prev.map((u) => (u.id === urunId ? { ...u, ...payload } : u)));
-        setGuncellenenSatisFiyatlari((prev) => {
-          const c = { ...prev };
-          delete c[urunId];
-          return c;
-        });
-        setGuncellenenTedarikFiyatlari((prev) => {
-          const c = { ...prev };
-          delete c[urunId];
-          return c;
-        });
-        toast.success("Güncelleme başarılı!");
-      })
-      .catch((err) => {
-        console.error("Tekil güncelleme hatası:", err?.response?.status, err?.response?.data || err?.message);
-        toast.error(err?.response?.data?.message || "Güncelleme başarısız oldu.");
+    try {
+      setRowLoading((m) => ({ ...m, [urunId]: true }));
+      await axios.put(`/v1/urunler/${urunId}/fiyat`, payload);
+
+      setUrunler((prev) => prev.map((u) => (u.id === urunId ? { ...u, ...payload } : u)));
+      setGuncellenenSatisFiyatlari((prev) => {
+        const c = { ...prev };
+        delete c[urunId];
+        return c;
       });
+      setGuncellenenTedarikFiyatlari((prev) => {
+        const c = { ...prev };
+        delete c[urunId];
+        return c;
+      });
+      toast.success("Güncelleme başarılı!");
+    } catch (err: any) {
+      console.error("Tekil güncelleme hatası:", err?.response?.status, err?.response?.data || err?.message);
+      toast.error(err?.response?.data?.message || "Güncelleme başarısız oldu.");
+    } finally {
+      setRowLoading((m) => ({ ...m, [urunId]: false }));
+    }
   };
 
   const uniqueMarkalar = Array.from(new Set(urunler.map((u) => u.marka).filter((m) => m && m.trim() !== "")));
@@ -168,7 +185,6 @@ export default function FiyatGuncellemeSayfasi() {
 
   /* --------- RENDER KİLİTLER --------- */
 
-  // Rol yetkisi yoksa: 403 (içerik asla görünmez)
   if (!canAccess) {
     return (
       <div className="max-w-xl mx-auto mt-10 p-6 rounded-2xl border border-gray-200 dark:border-white/10">
@@ -178,7 +194,6 @@ export default function FiyatGuncellemeSayfasi() {
     );
   }
 
-  // Şifre zorunlu: unlocked false ise içerik ASLA render edilmez
   if (!unlocked) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -197,11 +212,12 @@ export default function FiyatGuncellemeSayfasi() {
           />
 
           <div className="flex items-center justify-between gap-2">
-            {/* Şifre yoksa tek seçenek: başka sayfaya git */}
             <Button variant="outline" onClick={() => navigate(REDIRECT_PATH)}>
               Anasayfaya Dön
             </Button>
-            <Button onClick={handleUnlock}>Doğrula</Button>
+            <Button onClick={handleUnlock} loading={unlocking} disabled={unlocking}>
+              Doğrula
+            </Button>
           </div>
         </div>
       </div>
@@ -213,7 +229,6 @@ export default function FiyatGuncellemeSayfasi() {
     <div className="space-y-6 max-w-full overflow-x-auto">
       <div className="flex items-center gap-2">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Fiyat Güncelleme Modülü</h1>
-        {/* Tekrar kilitle: içerik gizlenir, modal geri gelir (her gelişte şifre şart) */}
         <button
           onClick={() => setUnlocked(false)}
           className="ml-1 text-xs px-2 py-1 rounded border border-gray-300 dark:border-white/10 dark:text-white"
@@ -300,7 +315,9 @@ export default function FiyatGuncellemeSayfasi() {
               </div>
             </div>
 
-            <Button onClick={handleTopluGuncelle}>Toplu Güncelle</Button>
+            <Button onClick={handleTopluGuncelle} loading={bulkLoading} disabled={bulkLoading}>
+              Toplu Güncelle
+            </Button>
           </div>
         </TabsContent>
 
@@ -355,7 +372,11 @@ export default function FiyatGuncellemeSayfasi() {
                               setGuncellenenTedarikFiyatlari({ ...guncellenenTedarikFiyatlari, [u.id]: e.target.value })
                             }
                             placeholder="₺0,00"
-                            className="border rounded px-2 py-1 text-sm w-28 text-center bg-white dark:bg-white/[0.05] text-black dark:text-white border-gray-300 dark:border-white/10"
+                            disabled={!!rowLoading[u.id]}
+                            className={classNames(
+                              "border rounded px-2 py-1 text-sm w-28 text-center bg-white dark:bg-white/[0.05] text-black dark:text-white border-gray-300 dark:border-white/10",
+                              rowLoading[u.id] && "opacity-60 cursor-not-allowed"
+                            )}
                           />
                         </td>
 
@@ -369,12 +390,23 @@ export default function FiyatGuncellemeSayfasi() {
                               setGuncellenenSatisFiyatlari({ ...guncellenenSatisFiyatlari, [u.id]: e.target.value })
                             }
                             placeholder="₺0,00"
-                            className="border rounded px-2 py-1 text-sm w-28 text-center bg-white dark:bg-white/[0.05] text-black dark:text-white border-gray-300 dark:border-white/10"
+                            disabled={!!rowLoading[u.id]}
+                            className={classNames(
+                              "border rounded px-2 py-1 text-sm w-28 text-center bg-white dark:bg-white/[0.05] text-black dark:text-white border-gray-300 dark:border-white/10",
+                              rowLoading[u.id] && "opacity-60 cursor-not-allowed"
+                            )}
                           />
                         </td>
 
                         <td className="px-3 py-2">
-                          <Button onClick={() => handleTekilGuncelle(u.id)} size="sm">Güncelle</Button>
+                          <Button
+                            onClick={() => handleTekilGuncelle(u.id)}
+                            size="sm"
+                            loading={!!rowLoading[u.id]}
+                            disabled={!!rowLoading[u.id]}
+                          >
+                            Güncelle
+                          </Button>
                         </td>
                       </tr>
                     ))}

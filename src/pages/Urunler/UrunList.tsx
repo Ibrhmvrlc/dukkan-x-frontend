@@ -41,6 +41,7 @@ export default function UrunList() {
   const [selectedValue, setSelectedValue] = useState<string | number | null>(null);
   const [urunQuery, setUrunQuery] = useState("");
   const [stokUrunAdaylari, setStokUrunAdaylari] = useState<Urun[]>([]);
+   const [submitting, setSubmitting] = useState(false); // 👈 eklendi
 
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [sensitiveVisible, setSensitiveVisible] = useState(false);
@@ -89,6 +90,7 @@ export default function UrunList() {
     e.preventDefault();
 
     try {
+      setSubmitting(true);           // loading başlat
       await axios.patch(`/v1/urunler/${stokForm.urun_id}/stok-ekle`, {
         miktar: parseInt(stokForm.miktar)
       });
@@ -104,6 +106,8 @@ export default function UrunList() {
     } catch (err: any) {
       console.error("Stok eklenemedi:", err.response?.data || err.message);
       toast.error("Stok eklenirken hata oluştu");
+    }finally {
+      setSubmitting(false);          // loading kapat
     }
   };
 
@@ -226,6 +230,7 @@ export default function UrunList() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setSubmitting(true);           // loading başlat
       await axios.post('/v1/urunler', {
         ...form,
         tedarik_fiyati: parseFloat(form.tedarik_fiyati),
@@ -250,6 +255,8 @@ export default function UrunList() {
     } catch (error: any) {
       console.error("Ürün eklenemedi:", error.response?.data || error.message);
       alert("Ürün eklenirken hata oluştu.");
+    }finally {
+      setSubmitting(false);          // loading kapat
     }
   };
 
@@ -267,6 +274,7 @@ export default function UrunList() {
     formData.append("file", bulkFile);
 
     try {
+      setSubmitting(true);           // loading başlat
       await axios.post('/v1/urunler/bulk-upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -283,6 +291,8 @@ export default function UrunList() {
       toast.error("Yükleme başarısız oldu.", {
         position: "top-right",
       });
+    }finally {
+      setSubmitting(false);          // loading kapat
     }
   };
 
@@ -293,6 +303,7 @@ export default function UrunList() {
 
   const handleExport = async () => {
     try {
+      setSubmitting(true);           // loading başlat
       const token = localStorage.getItem('token'); // eksikse bu satır olsun
 
       const response = await axios.post('/v1/urunler/export', {}, {
@@ -314,6 +325,8 @@ export default function UrunList() {
     } catch (error) {
       console.error("Excel dışa aktarma hatası:", error);
       toast.error("Excel dışa aktarma başarısız oldu", { position: "top-right" });
+    }finally {
+      setSubmitting(false);          // loading kapat
     }
   };
 
@@ -396,13 +409,15 @@ export default function UrunList() {
                 Toplu Yükle
               </Button>
               <Button
-                onClick={handleExport}
-                size="sm"
-                variant="outline"
-                startIcon={<ArrowDownIcon />}
-                className="whitespace-nowrap shrink-0"
-              >
-                Excel İndir
+                  onClick={handleExport}
+                  variant="outline"
+                  size="sm"
+                  className="whitespace-nowrap shrink-0"
+                  startIcon={<ArrowDownIcon />}
+                  loading={submitting}   // 👈 spinner + disable
+                  disabled={submitting}  // (opsiyonel, loading zaten disable ediyor)
+                >
+                  {'Excel İndir'}
               </Button>
             </div>
 
@@ -694,9 +709,15 @@ export default function UrunList() {
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-white rounded">
                   Vazgeç
                 </button>
-                <button type="submit" className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
-                  Kaydet
-                </button>
+                <Button
+                    variant="primary"
+                    size="sm"
+                    type="submit"          // 👈 kritik
+                    loading={submitting}   // 👈 spinner + disable
+                    disabled={submitting}  // (opsiyonel, loading zaten disable ediyor)
+                  >
+                    {'Kaydet'}
+                </Button>
               </div>
             </form>
           </div>
@@ -758,9 +779,15 @@ export default function UrunList() {
                 <button type="button" onClick={() => setShowStokModal(false)} className="px-4 py-2 text-sm bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-white rounded">
                   Vazgeç
                 </button>
-                <button type="submit" className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
-                  Stok Ekle
-                </button>
+                <Button
+                    variant="primary"
+                    size="sm"
+                    type="submit"          // 👈 kritik
+                    loading={submitting}   // 👈 spinner + disable
+                    disabled={submitting}  // (opsiyonel, loading zaten disable ediyor)
+                  >
+                    {' Stok Ekle'}
+                </Button>
               </div>
             </form>
           </div>
@@ -794,12 +821,15 @@ export default function UrunList() {
                 >
                   Vazgeç
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Yükle
-                </button>
+                <Button
+                    variant="primary"
+                    size="sm"
+                    type="submit"          // 👈 kritik
+                    loading={submitting}   // 👈 spinner + disable
+                    disabled={submitting}  // (opsiyonel, loading zaten disable ediyor)
+                  >
+                    {'Yükle'}
+                </Button>
               </div>
             </form>
           </div>

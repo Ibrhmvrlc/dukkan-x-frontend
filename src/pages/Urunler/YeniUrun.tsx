@@ -5,7 +5,7 @@ import Button from "../../components/ui/button/Button";
 
 export default function YeniUrun() {
   const navigate = useNavigate();
-
+  const [submitting, setSubmitting] = useState(false); // 👈 eklendi
   const [form, setForm] = useState({
     kod: "",
     isim: "",
@@ -49,6 +49,7 @@ export default function YeniUrun() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
+      setSubmitting(true);           // loading başlat
       await axios.post("/v1/urunler", {
         ...form,
         tedarik_fiyati: parseFloat(form.tedarik_fiyati),
@@ -60,6 +61,8 @@ export default function YeniUrun() {
     } catch (err: any) {
       console.error("Ürün eklenemedi:", err.response?.data || err.message);
       alert("Ürün eklenirken hata oluştu.");
+    }finally {
+      setSubmitting(false);          // loading kapat
     }
   };
 
@@ -96,7 +99,15 @@ export default function YeniUrun() {
         ))}
 
         <div className="flex justify-end mt-4">
-          <Button>Kaydet</Button>
+          <Button
+              variant="primary"
+              size="sm"
+              type="submit"          // 👈 kritik
+              loading={submitting}   // 👈 spinner + disable
+              disabled={submitting}  // (opsiyonel, loading zaten disable ediyor)
+            >
+              {'Kaydet'}
+          </Button>
         </div>
       </form>
     </div>

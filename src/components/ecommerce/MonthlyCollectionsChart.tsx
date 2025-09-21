@@ -1,3 +1,4 @@
+// src/components/ecommerce/MonthlyCollectionsChart.tsx
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { Dropdown } from "../ui/dropdown/Dropdown";
@@ -36,7 +37,6 @@ function last13MonthLabelsTR(): string[] {
   const arr: string[] = [];
   for (let i = 12; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    // "Eyl.", "Eki." vb. gelebilir; noktayı kaldır, ilk harfi büyük tut
     const raw = d.toLocaleDateString("tr-TR", { month: "short" });
     arr.push(raw.replace(".", ""));
   }
@@ -63,7 +63,7 @@ export default function MonthlyCollectionsChart() {
         from: "",
         to: "",
         labels: last13MonthLabelsTR(),
-        totals: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        totals: Array(13).fill(0),
       });
     } finally {
       setLoading(false);
@@ -74,10 +74,19 @@ export default function MonthlyCollectionsChart() {
     fetchData();
   }, []);
 
+  // 🔹 Yalnızca mobilde min-width ver (scroll'u sadece mobilde tetikle)
+  //    Geniş ekranlarda min-w: 100% olsun (scroll gerekmesin).
+  const dynamicMinWidth = useMemo(() => {
+    const count = data?.labels?.length ?? 13;
+    // Her sütun ~52px (etiket + bar), mobilde rahat kaydırma için
+    return Math.max(700, count * 52);
+  }, [data?.labels]);
+
   const options: ApexOptions = useMemo(() => ({
     colors: ["#10B981"],
     chart: { fontFamily: "Outfit, sans-serif", type: "bar", height: 180, toolbar: { show: false } },
     plotOptions: {
+      // Masaüstü varsayılanı: biraz daha geniş sütunlar
       bar: { horizontal: false, columnWidth: "39%", borderRadius: 5, borderRadiusApplication: "end" },
     },
     dataLabels: { enabled: false },
@@ -86,6 +95,14 @@ export default function MonthlyCollectionsChart() {
       categories: data?.labels ?? Array(13).fill(""),
       axisBorder: { show: false },
       axisTicks: { show: false },
+      // Masaüstü varsayılanı: düz etiket (rotate = 0)
+      labels: {
+        rotate: 0,
+        trim: true,
+        maxHeight: 60,
+        style: { fontSize: "12px" },
+      },
+      tickPlacement: "between",
     },
     legend: { show: true, position: "top", horizontalAlign: "left", fontFamily: "Outfit" },
     yaxis: {
@@ -95,6 +112,21 @@ export default function MonthlyCollectionsChart() {
     grid: { yaxis: { lines: { show: true } } },
     fill: { opacity: 1 },
     tooltip: { x: { show: true }, y: { formatter: (val: number) => fmtTLFull(val) } },
+
+    // 🔸 ApexCharts responsive: 768px ve altında mobil ayarlarını uygula
+    responsive: [
+      {
+        breakpoint: 768,
+        options: {
+          plotOptions: { bar: { columnWidth: "35%" } }, // dar ekran için biraz incelt
+          xaxis: {
+            labels: {
+              style: { fontSize: "11px" },
+            },
+          },
+        },
+      },
+    ],
   }), [data?.labels]);
 
   const series = useMemo(() => [{
@@ -107,12 +139,11 @@ export default function MonthlyCollectionsChart() {
       <div className="flex items-center justify-between">
         {loading ? (
           ''
-        ) : ( 
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-          Aylık Tahsilatlar (Son 12 Ay)
-        </h3>
-         )
-        }
+        ) : (
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+            Aylık Tahsilatlar (Son 12 Ay)
+          </h3>
+        )}
         <div className="relative inline-block">
           <button className="dropdown-toggle" onClick={() => setIsOpen((s) => !s)}>
             <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
@@ -134,41 +165,43 @@ export default function MonthlyCollectionsChart() {
         </div>
       )}
 
+      {/* Dış sarmal her zaman overflow-x-auto; iç sarmal:
+          - Mobilde min-width: var(--minW) → kaydırma açık
+          - md ve üstünde min-width: 100% → kaydırma gerekmez */}
       <div className="max-w-full overflow-x-auto custom-scrollbar">
-        {loading ? (
-        <div className="h-[180px] animate-pulse">
-          {/* barların gövdeleri */}
-          <div className="flex h-[150px] items-end gap-2">
-            {Array.from({ length: 13 }).map((_, i) => {
-              // 150px içinde değişken yükseklikler (grafik hissi için)
-              const heights = [40, 70, 55, 95, 60, 80, 50, 110, 65, 85, 58, 100, 75];
-              const h = heights[i % heights.length];
-              return (
-                <div key={i} className="flex-1 flex items-end justify-center">
-                  <div
-                    className="w-2/3 rounded-md bg-gray-200 dark:bg-gray-800"
-                    style={{ height: `${h}px` }}
-                    aria-hidden
-                  />
-                </div>
-              );
-            })}
-          </div>
-
-          {/* x-ekseni etiket placeholder’ları */}
-          <div className="mt-2 flex justify-between px-1">
-            {Array.from({ length: 13 }).map((_, i) => (
-              <span
-                key={i}
-                className="h-3 w-5 rounded bg-gray-200 dark:bg-gray-800"
-                aria-hidden
-              />
-            ))}
-          </div>
+        <div
+          className="-ml-5 pl-2 min-w-[var(--minW)] md:min-w-full xl:min-w-full"
+          style={{ ["--minW" as any]: `${dynamicMinWidth}px` }}
+        >
+          {loading ? (
+            <div className="h-[180px] animate-pulse">
+              {/* bar gövdeleri */}
+              <div className="flex h-[150px] items-end gap-2">
+                {Array.from({ length: 13 }).map((_, i) => {
+                  const heights = [40, 70, 55, 95, 60, 80, 50, 110, 65, 85, 58, 100, 75];
+                  const h = heights[i % heights.length];
+                  return (
+                    <div key={i} className="flex-1 flex items-end justify-center">
+                      <div
+                        className="w-2/3 rounded-md bg-gray-200 dark:bg-gray-800"
+                        style={{ height: `${h}px` }}
+                        aria-hidden
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              {/* x-ekseni placeholder’ları */}
+              <div className="mt-2 flex justify-between px-1">
+                {Array.from({ length: 13 }).map((_, i) => (
+                  <span key={i} className="h-3 w-5 rounded bg-gray-200 dark:bg-gray-800" aria-hidden />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Chart options={options} series={series} type="bar" height={180} />
+          )}
         </div>
-      ) : (
-        <Chart options={options} series={series} type="bar" height={180} />
-      )}
       </div>
     </div>
   );

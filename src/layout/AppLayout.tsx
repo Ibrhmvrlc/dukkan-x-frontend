@@ -1,14 +1,14 @@
+// src/layout/AppLayout.tsx
 import { SidebarProvider, useSidebar } from "../context/SidebarContext";
-import { Outlet } from "react-router";
+import { Outlet } from "react-router-dom"; // ✅ DÜZELTİLDİ
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
 import { useAuth } from '../context/AuthContext';
 import { useEffect } from 'react';
 
-
 const LayoutContent: React.FC = () => {
-   const { user, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -31,7 +31,7 @@ const LayoutContent: React.FC = () => {
     } catch {
       logout();
     }
-  }, [user]);
+  }, [user, logout]);
 
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
@@ -41,14 +41,16 @@ const LayoutContent: React.FC = () => {
         <AppSidebar />
         <Backdrop />
       </div>
+
       <div
         className={`flex-1 transition-all duration-300 ease-in-out ${
           isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"
         } ${isMobileOpen ? "ml-0" : ""}`}
       >
         <AppHeader />
+        {/* Sidebar fixed ise içerik üstte header ile çakışmasın diye padding veriyorsan koru */}
         <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
-          <Outlet />
+          <Outlet /> {/* ✅ Artık react-router-dom’dan, çocuk sayfalar render olur */}
         </div>
       </div>
     </div>

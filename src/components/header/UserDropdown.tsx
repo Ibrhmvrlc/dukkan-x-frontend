@@ -3,10 +3,13 @@ import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
+import { useAuth } from "../../context/AuthContext";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+
+  const { user } = useAuth();
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -21,7 +24,8 @@ export default function UserDropdown() {
     navigate("/signin");
     toast.warning("Çıkış Yapıldı.");
   };
-  
+
+
   return (
     <div className="relative">
       <button
@@ -32,7 +36,7 @@ export default function UserDropdown() {
           <img src="/images/user/user.png" alt="User" />
         </span>
           
-        <span className="block mr-1 font-medium text-theme-sm">Kullanıcı</span>
+        <span className="block mr-1 font-medium text-theme-sm">{user?.name}</span>
        
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
@@ -168,7 +172,7 @@ export default function UserDropdown() {
               fill=""
             />
           </svg>
-          Sign out
+          Çıkış Yap
         </button>
       </Dropdown>
     </div>

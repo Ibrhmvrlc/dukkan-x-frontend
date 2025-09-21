@@ -31,11 +31,19 @@ export default function TahsilatEklePage() {
   const submit = async () => {
     const t = Number(form.tutar);
     if (!form.musteri_id) {
-      toast.error("Müşteri seçin.");   // ❌ alert yerine
+      toast.error("Müşteri seçin.");
       return;
     }
     if (!t || t <= 0) {
-      toast.error("Geçerli bir tutar girin."); 
+      toast.error("Geçerli bir tutar girin.");
+      return;
+    }
+    if (!form.kanal?.trim()) {
+      toast.error("Kanal girilmesi zorunludur.");
+      return;
+    }
+    if (!form.referans_no?.trim()) {
+      toast.error("Belge No girilmesi zorunludur.");
       return;
     }
 
@@ -44,20 +52,19 @@ export default function TahsilatEklePage() {
       await axios.post(`/v1/musteriler/${form.musteri_id}/tahsilatlar`, {
         tarih: form.tarih,
         tutar: t,
-        kanal: form.kanal || null,
-        referans_no: form.referans_no || null,
+        kanal: form.kanal,
+        referans_no: form.referans_no,
         aciklama: form.aciklama || null,
       });
-      toast.success("Tahsilat eklendi."); 
-      navigate(`/musteriler/${form.musteri_id}/duzenle`);  // ✅ müşteri detayına yönlendir
+      toast.success("Tahsilat eklendi.");
+      navigate(`/musteriler/${form.musteri_id}/duzenle`);
     } catch (e: any) {
       console.error(e);
       toast.error(e?.response?.data?.message || "Kayıt başarısız.");
     } finally {
       setSaving(false);
     }
-};
-
+  };
 
   return (
     <div className="space-y-4">
@@ -119,6 +126,7 @@ export default function TahsilatEklePage() {
               <label className="block text-sm font-medium mb-1">Kanal</label>
               <input
                 type="text"
+                required   // ✅ tarayıcı bazlı kontrol
                 placeholder="Nakit, Havale/EFT, Kredi Kartı"
                 value={form.kanal}
                 onChange={(e) => setForm((f) => ({ ...f, kanal: e.target.value }))}
@@ -126,9 +134,10 @@ export default function TahsilatEklePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Referans No</label>
+              <label className="block text-sm font-medium mb-1">Belge No</label>
               <input
                 type="text"
+                required   // ✅ tarayıcı bazlı kontrol
                 value={form.referans_no}
                 onChange={(e) => setForm((f) => ({ ...f, referans_no: e.target.value }))}
                 className="w-full border p-2 rounded-lg dark:border-white/20"

@@ -3,7 +3,7 @@ import axios from "axios";
 // const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/+$/, ""); // sondaki /'ları temizle
 
 const instance = axios.create({
-  baseURL: `http://localhost:8000/api`, //baseURL: `${API_BASE}/api`,
+  baseURL: `http://localhost:8000/api`, //
   withCredentials: false, // gerekiyorsa kalsın
 });
 

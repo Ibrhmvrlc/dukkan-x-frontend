@@ -36,7 +36,7 @@ export default function FiyatGuncellemeSayfasi() {
   const [unlocked, setUnlocked] = useState<boolean>(false);
   const [unlocking, setUnlocking] = useState<boolean>(false);
 
-  const ALLOWED_ROLES = ["admin", "yönetici", "yonetici", "müdür", "mudur", "owner"];
+  const ALLOWED_ROLES = ["admin", "yönetici", "yonetici", "müdür", "mudur", "owner", "yetkili_bir"];
   const REDIRECT_PATH = "/";
 
   // Sayfa state

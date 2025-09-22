@@ -42,7 +42,7 @@ import TahsilatEklePage from "./pages/Tahsilatlar/TahsilatEklePage.tsx";
 // Support sayfaları
 import SupportChat from "./pages/Support/SupportChat";
 import AdminSupportInbox from "./pages/Support/AdminSupportInbox";
-import AdminSupportChat from "./pages/Support/AdminSupportChat";
+// import AdminSupportChat from "./pages/Support/AdminSupportChat";
 
 export default function App() {
   const { loading } = useAuth();
@@ -125,6 +125,7 @@ export default function App() {
                 </RoleRoute>
               }
             />
+            {/* Support
             <Route
               path="support/threads/:id"
               element={
@@ -133,6 +134,7 @@ export default function App() {
                 </RoleRoute>
               }
             />
+             */}
           </Route>
 
           {/* Diğer örnek sayfalar */}

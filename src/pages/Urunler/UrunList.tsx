@@ -46,7 +46,7 @@ export default function UrunList() {
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [sensitiveVisible, setSensitiveVisible] = useState(false);
 
-  const CAN_SEE_ROLES = ["admin","yönetici","yonetici","müdür","mudur","owner"];
+  const CAN_SEE_ROLES = ["admin","yönetici","yonetici","müdür","mudur","owner","yetkili_bir"];
   const canSeeSensitiveCols = userRoles.some(r => CAN_SEE_ROLES.includes(r.toLowerCase()));
 
 

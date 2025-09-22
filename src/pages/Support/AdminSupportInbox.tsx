@@ -47,7 +47,7 @@ export default function AdminSupportInbox() {
 
   return (
     <div className="p-4">
-      <div className="text-lg font-semibold mb-3">Destek Kutusu</div>
+      <div className="text-lg font-semibold mb-3 dark:text-white">Destek Kutusu</div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((t) => (
           <Link

@@ -72,11 +72,8 @@ const AppSidebar: React.FC = () => {
         { icon: <CalenderIcon />, name: "Takvim", path: "/calendar" },
         {
           icon: <PencilIcon />,
-          name: "Destek",
-          subItems: [
-            { name: "Destek Kutusu", path: "/admin/support", badge: inboxUnread },
-            { name: "Kullanıcı Görünümü", path: "/support" },
-          ],
+          name: "Destek Kutusu",
+          path: "/admin/support",
         },
       ];
     }
